@@ -1,0 +1,17 @@
+import { Router } from "express";
+import { EventController } from "../controllers/eventController";
+import { ensureAuthenticated, ensureRole } from "../middlewares/authMiddleware";
+
+const eventRoutes = Router();
+const eventController = new EventController();
+
+eventRoutes.get("/", eventController.list);
+
+eventRoutes.post(
+  "/",
+  ensureAuthenticated,
+  ensureRole(["ORGANIZER"]),
+  eventController.create,
+);
+
+export { eventRoutes };

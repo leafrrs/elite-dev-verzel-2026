@@ -1,0 +1,8 @@
+### Testar Login com Sucesso
+POST http://localhost:3333/auth/login
+Content-Type: application/json
+
+{
+  "email": "organizador@verzel.com.br",
+  "password": "123456"
+}

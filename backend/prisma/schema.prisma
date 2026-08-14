@@ -1,0 +1,115 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// 1. USUÁRIOS (Roles: ORGANIZER, CLIENT, GATE_STAFF)
+model User {
+  id           String        @id @default(uuid())
+  name         String
+  email        String        @unique
+  passwordHash String
+  role         String        @default("CLIENT") // "ORGANIZER" | "CLIENT" | "GATE_STAFF"
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  events       Event[]
+  reservations Reservation[]
+  tickets      Ticket[]
+
+  @@map("users")
+}
+
+// 2. EVENTOS (Type: SEATED, GENERAL_ADMISSION / Source: TMDB, TICKETMASTER, MANUAL)
+model Event {
+  id             String         @id @default(uuid())
+  title          String
+  description    String
+  bannerUrl      String?
+  date           DateTime
+  location       String
+  price          Float
+  type           String         @default("GENERAL_ADMISSION") // "SEATED" | "GENERAL_ADMISSION"
+  totalCapacity  Int
+  availableStock Int
+  externalSource String         @default("MANUAL")            // "TMDB" | "TICKETMASTER" | "MANUAL"
+  externalId     String?
+  
+  organizerId    String
+  organizer      User           @relation(fields: [organizerId], references: [id])
+
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  seats          Seat[]
+  reservations   Reservation[]
+  tickets        Ticket[]
+
+  @@map("events")
+}
+
+// 3. ASSENTOS (Status: AVAILABLE, RESERVED, SOLD)
+model Seat {
+  id        String     @id @default(uuid())
+  eventId   String
+  seatCode  String     // Ex: "A1", "A2", "B10"
+  status    String     @default("AVAILABLE") // "AVAILABLE" | "RESERVED" | "SOLD"
+  
+  event     Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  tickets   Ticket[]
+
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  // REGRA DE OURO: Garante no nível do banco que não existam dois assentos iguais no mesmo evento
+  @@unique([eventId, seatCode])
+  @@map("seats")
+}
+
+// 4. RESERVAS (Status: PENDING, CONFIRMED, REFUSED, CANCELLED)
+model Reservation {
+  id          String            @id @default(uuid())
+  userId      String
+  eventId     String
+  totalAmount Float
+  status      String            @default("PENDING") // "PENDING" | "CONFIRMED" | "REFUSED" | "CANCELLED"
+
+  user        User              @relation(fields: [userId], references: [id])
+  event       Event             @relation(fields: [eventId], references: [id])
+  tickets     Ticket[]
+
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@map("reservations")
+}
+
+// 5. INGRESSOS (Status: VALID, USED, CANCELLED)
+model Ticket {
+  id            String       @id @default(uuid())
+  ticketCode    String       @unique // Código alfanumérico curto (ex: "VRZ-8X92K") para digitação manual
+  secureHash    String       // Assinatura HMAC anti-forja para o QR Code
+  status        String       @default("VALID") // "VALID" | "USED" | "CANCELLED"
+  usedAt        DateTime?    // Momento exato em que a portaria validou o ingresso
+
+  reservationId String
+  reservation   Reservation  @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+
+  eventId       String
+  event         Event        @relation(fields: [eventId], references: [id])
+
+  userId        String
+  user          User         @relation(fields: [userId], references: [id])
+
+  seatId        String?
+  seat          Seat?        @relation(fields: [seatId], references: [id])
+
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@map("tickets")
+}

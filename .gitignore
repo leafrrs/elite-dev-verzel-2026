@@ -1,0 +1,31 @@
+# Dependências
+node_modules/
+
+# Build
+dist/
+
+# Variáveis de ambiente
+.env
+.env.*
+!.env.example
+
+# Banco local
+*.db
+*.db-journal
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDE / ferramentas locais
+.claude/settings.local.json
+.antigravity/
+*.local
+
+# Testes
+coverage/
+
+# Logs e temporários
+*.log
+.tmp/
