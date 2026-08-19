@@ -65,4 +65,33 @@
       border-bottom: 2px solid $color-accent;
     }
   }
+
+  &__user-menu {
+    display: flex;
+    align-items: center;
+    gap: ($space-base * 2);
+  }
+
+  &__user-name {
+    font-size: 0.9rem;
+    color: $color-text-main;
+    font-weight: 500;
+  }
+
+  &__logout-btn {
+    font-size: 0.85rem;
+    color: $color-accent;
+    font-weight: 600;
+    transition: opacity 0.2s ease;
+
+    &:hover {
+      opacity: 0.8;
+      text-decoration: underline;
+    }
+
+    &:focus-visible {
+      outline: 2px solid $color-accent;
+      border-radius: $radius-sm;
+    }
+  }
 }
