@@ -7,6 +7,8 @@ import { EventDetailsPage } from '../pages/EventDetailsPage';
 import { LoginPage } from '../pages/LoginPage';
 import { OrganizerPage } from '../pages/OrganizerPage';
 import { GatePage } from '../pages/GatePage';
+import { ReservationPage } from '../pages/ReservationPage';
+import { CheckoutPage } from '../pages/CheckoutPage';
 
 export function AppRoutes() {
   return (
@@ -18,6 +20,12 @@ export function AppRoutes() {
         <Route path="/" element={<HomePage />} />
         <Route path="/events/:id" element={<EventDetailsPage />} />
         <Route path="/login" element={<LoginPage />} />
+
+        {/* Rotas Protegidas - Client (Comprador) */}
+        <Route element={<ProtectedRoute allowedRoles={['CLIENT']} />}>
+          <Route path="/events/:id/reserve" element={<ReservationPage />} />
+          <Route path="/checkout/:reservationId" element={<CheckoutPage />} />
+        </Route>
 
         {/* Rotas Protegidas - Organizer (Somente o ORGANIZER acessa) */}
         <Route element={<ProtectedRoute allowedRoles={['ORGANIZER']} />}>

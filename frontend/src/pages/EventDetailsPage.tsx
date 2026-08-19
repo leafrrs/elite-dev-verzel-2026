@@ -59,8 +59,7 @@ export function EventDetailsPage() {
       navigate('/login');
       return;
     }
-    // Lógica futura de reserva entra aqui (Fase F6)
-    alert("Funcionalidade de reserva será habilitada em breve.");
+    navigate(`/events/${event!.id}/reserve`);
   }
 
   return (

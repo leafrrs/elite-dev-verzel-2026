@@ -2,17 +2,24 @@
 const API_URL = import.meta.env.VITE_API_URL;
 
 export async function fetchApi(endpoint: string, options: RequestInit = {}) {
-  // Configuração base combinando a URL e headers padrão (como JSON)
+  // Busca o token persistido (não acopla o serviço ao ciclo de vida do React)
+  const token = localStorage.getItem('@VerzelEvents:token');
+
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(options.headers as Record<string, string> || {}),
+  };
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
   const response = await fetch(`${API_URL}${endpoint}`, {
     ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
+    headers,
   });
 
   if (!response.ok) {
-    // Tenta ler o JSON do erro do backend (ex: { "error": "Credenciais inválidas" })
     const errorData = await response.json().catch(() => null);
     throw {
       status: response.status,
@@ -20,7 +27,6 @@ export async function fetchApi(endpoint: string, options: RequestInit = {}) {
     };
   }
 
-  // Se não tem corpo de resposta (ex: 204), não dá erro ao parsear JSON
   if (response.status === 204) return null;
   
   return response.json();

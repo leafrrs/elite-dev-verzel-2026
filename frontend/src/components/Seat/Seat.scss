@@ -1,0 +1,55 @@
+@use '../../styles/variables' as *;
+
+.seat {
+  width: 48px;
+  height: 48px;
+  border-radius: $radius-sm;
+  font-weight: 600;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  cursor: pointer;
+
+  /* Estados de domínio (Backend) */
+  &--available {
+    background-color: $color-bg-primary;
+    border: 2px solid $color-text-secondary;
+    color: $color-text-main;
+
+    &:hover {
+      border-color: $color-text-main;
+    }
+  }
+
+  &--reserved {
+    background-color: #f39c12; // Laranja para reservado
+    border: 2px solid #e67e22;
+    color: #fff;
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+
+  &--sold {
+    background-color: #333; // Cinza escuro para vendido
+    border: 2px solid #222;
+    color: #666;
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  /* Estado temporário da UI (Front-End) */
+  &--selected {
+    background-color: $color-accent !important;
+    border-color: $color-accent !important;
+    color: #fff !important;
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba($color-accent, 0.4);
+  }
+
+  &:focus-visible {
+    outline: 2px solid white;
+    outline-offset: 2px;
+  }
+}
