@@ -1,19 +1,30 @@
 import { Request, Response } from "express";
 import { TicketService } from "../services/ticketService";
 import { AppError } from "../lib/AppError";
+import { validateTicketSchema } from "../schemas/ticketSchema";
 
 const ticketService = new TicketService();
 
 export class TicketController {
   async Validate(req: Request, res: Response) {
     try {
-      const { ticketCode, secureHash } = req.body;
+      const validation = validateTicketSchema.safeParse(req.body);
 
-      if (!ticketCode || !secureHash) {
-        return res.status(400).json({ error: "Faltam os dados do QR Code!" });
+      if (!validation.success) {
+        return res.status(400).json({
+          error: "Dados inválidos.",
+          details: validation.error.flatten().fieldErrors
+        });
       }
 
-      const result = await ticketService.validateTicket(ticketCode, secureHash);
+      const { ticketCode, secureHash, eventId } = validation.data;
+
+      // Repassa o eventId da portaria para garantir que o ingresso pertence a este evento
+      const result = await ticketService.validateTicket(
+        ticketCode,
+        secureHash,
+        eventId
+      );
 
       return res.status(200).json(result);
     } catch (error: any) {

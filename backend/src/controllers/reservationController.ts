@@ -1,19 +1,24 @@
 import { Request, Response } from "express";
 import { ReservationService } from "../services/reservationService";
 import { AppError } from "../lib/AppError";
+import { createReservationSchema, processPaymentBodySchema, processPaymentParamsSchema } from "../schemas/reservationSchema";
 
 const reservationService = new ReservationService();
 
 export class ReservationController {
   async create(req: Request, res: Response) {
     try {
-      const { eventId, seatCode } = req.body;
+      const validation = createReservationSchema.safeParse(req.body);
 
-      const userId = (req as any).user.id;
-
-      if (!eventId) {
-        return res.status(400).json({ error: "O ID do evento é obrigatório." });
+      if (!validation.success) {
+        return res.status(400).json({
+          error: "Dados inválidos.",
+          details: validation.error.flatten().fieldErrors
+        });
       }
+
+      const { eventId, seatCode } = validation.data;
+      const userId = (req as any).user.id;
 
       const reservation = await reservationService.createReservation(
         eventId,
@@ -26,15 +31,36 @@ export class ReservationController {
         reservation,
       });
     } catch (error: any) {
-      return res.status(400).json({ error: error.message });
+      if (error instanceof AppError) {
+        return res.status(error.statusCode).json({ error: error.message });
+      }
+      console.error(error);
+      return res.status(500).json({ error: "Erro interno do servidor." });
     }
   }
 
   async pay(req: Request, res: Response) {
     try {
-      const { reservationId } = req.params;
-      const { approved } = req.body;
+      // Validação do parâmetro da rota (reservationId UUID)
+      const paramsValidation = processPaymentParamsSchema.safeParse(req.params);
+      if (!paramsValidation.success) {
+        return res.status(400).json({
+          error: "Dados inválidos na URL.",
+          details: paramsValidation.error.flatten().fieldErrors
+        });
+      }
 
+      // Validação do corpo da requisição (approved boolean)
+      const bodyValidation = processPaymentBodySchema.safeParse(req.body);
+      if (!bodyValidation.success) {
+        return res.status(400).json({
+          error: "Dados inválidos no corpo da requisição.",
+          details: bodyValidation.error.flatten().fieldErrors
+        });
+      }
+
+      const { reservationId } = paramsValidation.data;
+      const { approved } = bodyValidation.data;
       const loggerUserId = (req as any).user.id;
 
       const result = await reservationService.processPayment(
@@ -48,7 +74,6 @@ export class ReservationController {
       if (error instanceof AppError) {
         return res.status(error.statusCode).json({ error: error.message });
       }
-
       console.error(error);
       return res.status(500).json({ error: "Erro interno do servidor." });
     }

@@ -1,0 +1,18 @@
+import dotenv from "dotenv";
+
+// Carrega as variáveis do .env ANTES de qualquer validação
+dotenv.config();
+
+function requireEnv(key: string): string {
+  const value = process.env[key];
+  if (!value) {
+    throw new Error(`CRITICAL ERROR: Variável de ambiente ${key} não está definida!`);
+  }
+  return value;
+}
+
+export const env = {
+  JWT_SECRET: requireEnv("JWT_SECRET"),
+  QR_SECRET_KEY: requireEnv("QR_SECRET_KEY"),
+  NODE_ENV: process.env.NODE_ENV || "development",
+};

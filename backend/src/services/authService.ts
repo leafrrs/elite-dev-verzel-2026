@@ -7,6 +7,9 @@ interface LoginParams {
   passwordStr: string;
 }
 
+import { env } from "../config/env";
+import { AppError } from "../lib/AppError";
+
 export class AuthService {
   async login({ email, passwordStr }: LoginParams) {
     const user = await prisma.user.findUnique({
@@ -14,7 +17,7 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new Error("E-mail ou senha incorretos");
+      throw new AppError("E-mail ou senha incorretos", 401);
     }
 
     const isPasswordValid = await bcrypt.compare(
@@ -23,19 +26,12 @@ export class AuthService {
     );
 
     if (!isPasswordValid) {
-      throw new Error("E-mail ou senha incorretos");
-    }
-
-    const jwtSecret = process.env.JWT_SECRET;
-    if (!jwtSecret) {
-      throw new Error(
-        "Aviso para o desenvolvedor: JWT_SECRET não configurado no .env",
-      );
+      throw new AppError("E-mail ou senha incorretos", 401);
     }
 
     const token = jwt.sign(
       { id: user.id, role: user.role },
-      process.env.JWT_SECRET as string,
+      env.JWT_SECRET,
       { expiresIn: "1d" },
     );
 

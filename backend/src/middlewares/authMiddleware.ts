@@ -5,6 +5,7 @@ interface TokenPayload {
   id: string;
   role: string;
 }
+import { env } from "../config/env";
 
 export function ensureAuthenticated(
   req: Request,
@@ -19,10 +20,7 @@ export function ensureAuthenticated(
   }
 
   try {
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET as string,
-    ) as TokenPayload;
+    const decoded = jwt.verify(token, env.JWT_SECRET) as TokenPayload;
 
     (req as any).user = {
       id: decoded.id,

@@ -2,7 +2,7 @@ import { prisma } from "../lib/prisma";
 import crypto from "crypto";
 
 import { AppError } from "../lib/AppError";
-
+import { env } from "../config/env";
 export class ReservationService {
   async createReservation(eventId: string, userId: string, seatCode?: string) {
     const event = await prisma.event.findUnique({
@@ -10,7 +10,7 @@ export class ReservationService {
     });
 
     if (!event) {
-      throw new Error("evento não endcontrado");
+      throw new AppError("Evento não encontrado.", 404);
     }
 
     if (event.type === "SEATED" && seatCode) {
@@ -21,10 +21,10 @@ export class ReservationService {
         seatCode,
       );
     } else if (event.type === "GENERAL_ADMISSION") {
-      return await this.reserveGeneralTicket(event.id, userId, event.price);
+      return await this.reserveGeneralTicket(event.id, userId);
     }
 
-    throw new Error("tipo de evento invalido ou assento não informado.");
+    throw new AppError("Tipo de evento inválido ou assento não informado.", 400);
   }
 
   private async reserveSeatedTicket(
@@ -39,7 +39,7 @@ export class ReservationService {
       });
 
       if (!seat) {
-        throw new Error("Assento não existe neste evento.");
+        throw new AppError("Assento não existe neste evento.", 404);
       }
 
       const updateResult = await tx.seat.updateMany({
@@ -51,9 +51,7 @@ export class ReservationService {
       });
 
       if (updateResult.count === 0) {
-        throw new Error(
-          "Assento indisponível ou já reservado por outra pessoa.",
-        );
+        throw new AppError("Assento indisponível ou já reservado por outra pessoa.", 409);
       }
 
       const reservation = await tx.reservation.create({
@@ -73,27 +71,36 @@ export class ReservationService {
   private async reserveGeneralTicket(
     eventId: string,
     userId: string,
-    price: number,
   ) {
     return await prisma.$transaction(async (tx) => {
       const event = await tx.event.findUnique({
         where: { id: eventId },
       });
-      if (!event || event.availableStock <= 0) {
-        throw new Error("Ingressos esgotados para este evento!");
+
+      if (!event) {
+        throw new AppError("Evento não encontrado.", 404);
       }
-      await tx.event.update({
-        where: { id: eventId },
-        data: { availableStock: { decrement: 1 } },
+      const updateResult = await tx.event.updateMany({
+        where: {
+          id: eventId,
+          availableStock: { gt: 0 },
+        },
+        data: {
+          availableStock: { decrement: 1 },
+        },
       });
+      if (updateResult.count === 0) {
+        throw new AppError("Ingressos esgotados para este evento!", 409);
+      }
       const reservation = await tx.reservation.create({
         data: {
           eventId,
           userId,
-          totalAmount: price,
+          totalAmount: event.price,
           status: "PENDING",
         },
       });
+
       return reservation;
     });
   }
@@ -105,10 +112,13 @@ export class ReservationService {
   ) {
     const reservation = await prisma.reservation.findUnique({
       where: { id: reservationId },
-      include: { event: true, tickets: true },
+      include: { event: true },
     });
 
-    if (!reservation) throw new AppError("Reserva não encontrada.", 404);
+    if (!reservation) {
+      throw new AppError("Reserva não encontrada.", 404);
+    }
+
     if (reservation.userId !== userId) {
       throw new AppError(
         "Acesso negado. Você não é o dono desta reserva.",
@@ -116,51 +126,85 @@ export class ReservationService {
       );
     }
 
-    if (reservation.status !== "PENDING")
-      throw new AppError("esta reserva ja foi processada.", 409);
+    if (reservation.status !== "PENDING") {
+      throw new AppError("Esta reserva já foi processada.", 409);
+    }
 
     if (!isApproved) {
-      await prisma.$transaction(async (tx) => {
-        await tx.reservation.update({
-          where: { id: reservationId },
+      return await prisma.$transaction(async (tx) => {
+        // Trava da Reserva
+        const updateResult = await tx.reservation.updateMany({
+          where: { id: reservationId, status: "PENDING" },
           data: { status: "REFUSED" },
         });
 
+        if (updateResult.count === 0) {
+          throw new AppError(
+            "A reserva já foi processada por outra requisição.",
+            409,
+          );
+        }
+
         if (reservation.event.type === "SEATED" && reservation.seatId) {
-          await tx.seat.update({
-            where: { id: reservation.seatId },
+          const seatUpdate = await tx.seat.updateMany({
+            where: { id: reservation.seatId, status: "RESERVED" },
             data: { status: "AVAILABLE" },
           });
+
+          if (seatUpdate.count === 0) {
+            throw new AppError(
+              "Inconsistência: o assento não estava reservado.",
+              409,
+            );
+          }
         } else if (reservation.event.type === "GENERAL_ADMISSION") {
           await tx.event.update({
             where: { id: reservation.event.id },
             data: { availableStock: { increment: 1 } },
           });
         }
-      });
 
-      return {
-        message: "Pagamento recusado. Ingresso liberado para o publico.",
-      };
+        return {
+          message: "Pagamento recusado. Ingresso liberado para o público.",
+        };
+      });
     }
 
     return await prisma.$transaction(async (tx) => {
-      await tx.reservation.update({
-        where: { id: reservationId },
+      const updateResult = await tx.reservation.updateMany({
+        where: { id: reservationId, status: "PENDING" },
         data: { status: "CONFIRMED" },
       });
 
-      if (reservation.event.type === "SEATED" && reservation.seatId) {
-        await tx.seat.update({
-          where: { id: reservation.seatId },
-          data: { status: "SOLD" },
-        });
+      if (updateResult.count === 0) {
+        throw new AppError(
+          "A reserva já foi processada por outra requisição.",
+          409,
+        );
       }
 
-      const ticketCode = `VZR-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+      if (reservation.event.type === "SEATED" && reservation.seatId) {
+        const seatUpdate = await tx.seat.updateMany({
+          where: { id: reservation.seatId, status: "RESERVED" },
+          data: { status: "SOLD" },
+        });
+
+        if (seatUpdate.count === 0) {
+          throw new AppError(
+            "Inconsistência: o assento não estava reservado.",
+            409,
+          );
+        }
+      }
+
+      const secureRandomHex = crypto
+        .randomBytes(8)
+        .toString("hex")
+        .toUpperCase();
+      const ticketCode = `VZR-${secureRandomHex}`;
 
       const secureHash = crypto
-        .createHmac("sha256", process.env.QR_SECRET_KEY as string)
+        .createHmac("sha256", env.QR_SECRET_KEY)
         .update(ticketCode)
         .digest("hex");
 
