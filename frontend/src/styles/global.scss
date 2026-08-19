@@ -1,0 +1,10 @@
+@use 'variables' as *;
+@use 'reset';
+
+// Aqui entrarão configurações globais do layout se necessário
+// Exemplo:
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 ($space-base * 2);
+}
