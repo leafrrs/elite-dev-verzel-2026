@@ -1,8 +1,137 @@
-### Testar Login com Sucesso
+# ==========================================
+# VARIÁVEIS GLOBAIS (Cole os dados aqui conforme for gerando)
+# ==========================================
+@clientAToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImU1Zjk0NjgzLWJjYmEtNGI3YS04Yzk5LThkOGNhNGE2NTVmNCIsInJvbGUiOiJDTElFTlQiLCJpYXQiOjE3ODcxNDM1MDUsImV4cCI6MTc4NzIyOTkwNX0.jToxqhgexd8rft3dvx3AxOWQRrYYKMkmr237MbETLzk
+@clientBToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVmMmRkOWY1LWUxMmEtNGI1Mi04OTY5LWZkYjljNzU4OTFhYyIsInJvbGUiOiJDTElFTlQiLCJpYXQiOjE3ODcxNDM1MzksImV4cCI6MTc4NzIyOTkzOX0.8ix6Gnd3vVYNUGPHGrpNcjm-__NPkGr-xaMoKtNiu4A
+@gateToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImUyYjQ2ZWIyLTQxNDctNDMzNC04OGM2LTM3ZDdlZjYzNGIwMyIsInJvbGUiOiJHQVRFX1NUQUZGIiwiaWF0IjoxNzg3MTQzNTczLCJleHAiOjE3ODcyMjk5NzN9.4NrdaGMBGiA9NSlWl5OrH_kBprknLe6b1-UFD7rdGow
+
+@eventId = ea0d31ca-95e4-4635-b0e4-154dc15a1bc7
+@reservaIdA = 15867b50-a7fb-4e60-8cd0-afe46fbd2867
+@reservaIdB = e753f106-69d2-4ee4-b8a1-5c37a0832778
+
+@ticketCode = VZR-PWCVP
+@secureHash = 906a1194325107cfec019488332a980fb39ada10d400d72933994c08e4f55f06
+
+### ==========================================
+### FASE 1: LOGINS E SETUP
+### ==========================================
+### Pegar o Novo ID do Evento
+GET http://localhost:3333/events
+
+
+### 1A. Login Cliente A
 POST http://localhost:3333/auth/login
 Content-Type: application/json
 
 {
-  "email": "organizador@verzel.com.br",
+  "email": "cliente1@verzel.com.br",
   "password": "123456"
+}
+
+### 1B. Login Cliente B (Criei esse e-mail na sua base ou use um que exista)
+POST http://localhost:3333/auth/login
+Content-Type: application/json
+
+{
+  "email": "cliente2@verzel.com.br",
+  "password": "123456"
+}
+
+### 1C. Login Portaria
+POST http://localhost:3333/auth/login
+Content-Type: application/json
+
+{
+  "email": "portaria@verzel.com.br",
+  "password": "123456"
+}
+
+### ==========================================
+### FASE 2: TESTES DE RESERVA (Concorrência)
+### ==========================================
+
+### 2A. Cliente A reserva a cadeira "A1"
+POST http://localhost:3333/reservations
+Content-Type: application/json
+Authorization: Bearer {{clientAToken}}
+
+{
+  "eventId": "{{eventId}}",
+  "seatCode": "B1"
+}
+
+### 2B. Cliente B tenta roubar a cadeira "A1" (Deve FALHAR com erro 409)
+POST http://localhost:3333/reservations
+Content-Type: application/json
+Authorization: Bearer {{clientBToken}}
+
+{
+  "eventId": "{{eventId}}",
+  "seatCode": "B1"
+}
+
+### 2C. Cliente B reserva a cadeira "A2" (Deve dar SUCESSO)
+POST http://localhost:3333/reservations
+Content-Type: application/json
+Authorization: Bearer {{clientBToken}}
+
+{
+  "eventId": "{{eventId}}",
+  "seatCode": "B2"
+}
+
+### ==========================================
+### FASE 3: TESTES DE PAGAMENTO (Autorização)
+### ==========================================
+
+### 3A. Cliente A tenta pagar a reserva do Cliente B (IDOR) - Deve FALHAR com erro 403
+POST http://localhost:3333/reservations/{{reservaIdB}}/pay
+Content-Type: application/json
+Authorization: Bearer {{clientAToken}}
+
+{
+  "approved": true
+}
+
+### 3B. Cliente A paga sua própria reserva - Deve gerar o Ingresso
+POST http://localhost:3333/reservations/{{reservaIdA}}/pay
+Content-Type: application/json
+Authorization: Bearer {{clientAToken}}
+
+{
+  "approved": true
+}
+
+### ==========================================
+### FASE 4: TESTES DA PORTARIA
+### ==========================================
+
+### 4A. Portaria escanea o ingresso válido (Deve dar SUCESSO e virar USED)
+POST http://localhost:3333/tickets/validate
+Content-Type: application/json
+Authorization: Bearer {{gateToken}}
+
+{
+  "ticketCode": "{{ticketCode}}",
+  "secureHash": "{{secureHash}}"
+}
+
+### 4B. Portaria escanea o mesmo ingresso de novo (Deve FALHAR com erro 409)
+POST http://localhost:3333/tickets/validate
+Content-Type: application/json
+Authorization: Bearer {{gateToken}}
+
+{
+  "ticketCode": "{{ticketCode}}",
+  "secureHash": "{{secureHash}}"
+}
+
+### 4C. Hacker tenta forjar a assinatura com texto inventado (Deve FALHAR com erro 403)
+POST http://localhost:3333/tickets/validate
+Content-Type: application/json
+Authorization: Bearer {{gateToken}}
+
+{
+  "ticketCode": "{{ticketCode}}",
+  "secureHash": "bc1qmz00uvzyxx0evgw6q06sc2qqy05t6jjqu5t3sd"
 }

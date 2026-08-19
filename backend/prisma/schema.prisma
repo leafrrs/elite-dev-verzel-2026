@@ -56,16 +56,14 @@ model Event {
 model Seat {
   id        String     @id @default(uuid())
   eventId   String
-  seatCode  String     // Ex: "A1", "A2", "B10"
-  status    String     @default("AVAILABLE") // "AVAILABLE" | "RESERVED" | "SOLD"
+  seatCode  String     
+  status    String     @default("AVAILABLE") 
   
   event     Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
   tickets   Ticket[]
-
+  reservations Reservation[] 
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
-
-  // REGRA DE OURO: Garante no nível do banco que não existam dois assentos iguais no mesmo evento
   @@unique([eventId, seatCode])
   @@map("seats")
 }
@@ -76,15 +74,15 @@ model Reservation {
   userId      String
   eventId     String
   totalAmount Float
-  status      String            @default("PENDING") // "PENDING" | "CONFIRMED" | "REFUSED" | "CANCELLED"
-
+  status      String            @default("PENDING") 
   user        User              @relation(fields: [userId], references: [id])
   event       Event             @relation(fields: [eventId], references: [id])
   tickets     Ticket[]
-
+  
+  seatId      String?           
+  seat        Seat?             @relation(fields: [seatId], references: [id]) 
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
-
   @@map("reservations")
 }
 
