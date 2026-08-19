@@ -1,0 +1,68 @@
+@use '../../styles/variables' as *;
+
+.header {
+  background-color: $color-bg-surface;
+  border-bottom: 1px solid rgba($color-text-secondary, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100; // Garante que fique sobre os conteúdos roláveis
+
+  &__container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 72px;
+  }
+
+  &__logo {
+    font-size: 1.25rem;
+    font-weight: 300;
+    letter-spacing: 1px;
+
+    a {
+      color: $color-text-main;
+      transition: color 0.2s ease;
+
+      strong {
+        font-weight: 700;
+        color: $color-accent;
+      }
+
+      &:hover, &:focus-visible {
+        color: $color-accent;
+        outline: 2px solid $color-accent;
+        outline-offset: 4px;
+        border-radius: $radius-sm;
+      }
+    }
+  }
+
+  &__nav {
+    display: flex;
+    gap: ($space-base * 3);
+  }
+
+  &__link {
+    font-size: 0.95rem;
+    color: $color-text-secondary;
+    font-weight: 500;
+    transition: color 0.2s ease;
+    padding: ($space-base) 0;
+
+    &:hover {
+      color: $color-text-main;
+    }
+
+    &:focus-visible {
+      outline: 2px solid $color-accent;
+      outline-offset: 4px;
+      border-radius: $radius-sm;
+      color: $color-text-main;
+    }
+
+    &--active {
+      color: $color-accent;
+      border-bottom: 2px solid $color-accent;
+    }
+  }
+}

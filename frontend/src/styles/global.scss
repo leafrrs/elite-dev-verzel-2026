@@ -1,10 +1,27 @@
 @use 'variables' as *;
 @use 'reset';
 
-// Aqui entrarão configurações globais do layout se necessário
-// Exemplo:
+// Wrapper principal para garantir que o Footer fique sempre embaixo (Sticky Footer flexível)
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.layout-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.layout-main {
+  flex: 1;
+  padding: ($space-base * 4) 0;
+}
+
 .container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 ($space-base * 2);
+  width: 100%;
+  max-width: 1120px;
+  margin-inline: auto;
+  padding-inline: ($space-base * 3);
 }
