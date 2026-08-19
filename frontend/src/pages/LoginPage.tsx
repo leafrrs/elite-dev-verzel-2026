@@ -28,8 +28,15 @@ export function LoginPage() {
       // 2. Passa a resposta de sucesso para o Contexto (salvar estado e localStorage)
       signIn(response);
       
-      // 3. Redireciona para a raiz de forma simples por enquanto
-      navigate('/');
+      // 3. Redireciona com base no papel do usuário
+      const role = response.user.role;
+      if (role === 'ORGANIZER') {
+        navigate('/organizer');
+      } else if (role === 'GATE_STAFF') {
+        navigate('/gate');
+      } else {
+        navigate('/'); // CLIENT
+      }
     } catch (err: any) {
       // Trata erros sem vazar stack trace
       if (err.status === 401) {
