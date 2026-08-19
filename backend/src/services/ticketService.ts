@@ -4,6 +4,34 @@ import { AppError } from "../lib/AppError";
 import { env } from "../config/env";
 
 export class TicketService {
+  async listByUser(userId: string) {
+    return await prisma.ticket.findMany({
+      where: { userId },
+      select: {
+        id: true,
+        ticketCode: true,
+        secureHash: true,
+        eventId: true,
+        status: true,
+        event: {
+          select: {
+            id: true,
+            title: true,
+            date: true,
+            location: true,
+            bannerUrl: true,
+          },
+        },
+        seat: {
+          select: {
+            seatCode: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+  }
+
   async validateTicket(ticketCode: string, providedHash: string, gateEventId: string) {
     // 1. Leitura do ingresso
     const ticket = await prisma.ticket.findUnique({

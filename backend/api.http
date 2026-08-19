@@ -61,6 +61,9 @@ Content-Type: application/json
 ### 1E. Listar Eventos (Use para pegar o ID do Evento)
 GET http://localhost:3333/events
 
+### 1F. Ver Detalhes do Evento (Com Assentos)
+GET {{baseUrl}}/events/{{eventId}}
+
 ### ==========================================
 ### FASE 2: TESTES DE RESERVA (Concorrência)
 ### ==========================================
@@ -116,6 +119,10 @@ Authorization: Bearer {{clientAToken}}
 {
   "approved": true
 }
+
+### 3C. Meus Ingressos (Deve listar os ingressos do Cliente A)
+GET {{baseUrl}}/tickets/me
+Authorization: Bearer {{clientAToken}}
 
 ### ==========================================
 ### FASE 4: TESTES DA PORTARIA

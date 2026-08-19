@@ -6,6 +6,20 @@ import { validateTicketSchema } from "../schemas/ticketSchema";
 const ticketService = new TicketService();
 
 export class TicketController {
+  async listMyTickets(req: Request, res: Response) {
+    try {
+      const userId = (req as any).user.id;
+      const tickets = await ticketService.listByUser(userId);
+      return res.status(200).json(tickets);
+    } catch (error: any) {
+      if (error instanceof AppError) {
+        return res.status(error.statusCode).json({ error: error.message });
+      }
+      console.error(error);
+      return res.status(500).json({ error: "Erro interno do servidor." });
+    }
+  }
+
   async Validate(req: Request, res: Response) {
     try {
       const validation = validateTicketSchema.safeParse(req.body);

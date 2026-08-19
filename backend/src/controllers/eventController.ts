@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { EventService } from "../services/eventService";
 import { AppError } from "../lib/AppError";
-import { createEventSchema } from "../schemas/eventSchema";
+import { createEventSchema, getEventByIdParamsSchema } from "../schemas/eventSchema";
 
 const eventService = new EventService();
 
@@ -16,6 +16,28 @@ export class EventController {
       }
       console.error(error);
       return res.status(500).json({ error: "Erro ao buscar eventos" });
+    }
+  }
+
+  async getById(req: Request, res: Response) {
+    try {
+      const validation = getEventByIdParamsSchema.safeParse(req.params);
+
+      if (!validation.success) {
+        return res.status(400).json({
+          error: "ID inválido.",
+          details: validation.error.flatten().fieldErrors
+        });
+      }
+
+      const event = await eventService.getById(validation.data.id);
+      return res.status(200).json(event);
+    } catch (error: any) {
+      if (error instanceof AppError) {
+        return res.status(error.statusCode).json({ error: error.message });
+      }
+      console.error(error);
+      return res.status(500).json({ error: "Erro ao buscar evento" });
     }
   }
 

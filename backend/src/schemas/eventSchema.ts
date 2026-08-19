@@ -13,3 +13,7 @@ export const createEventSchema = z.object({
   bannerUrl: z.string().trim().url("URL do banner inválida.").optional(),
   externalSource: z.string().trim().optional()
 });
+
+export const getEventByIdParamsSchema = z.object({
+  id: z.string().uuid("ID do evento inválido (deve ser um UUID).")
+});

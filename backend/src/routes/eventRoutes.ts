@@ -6,6 +6,7 @@ const eventRoutes = Router();
 const eventController = new EventController();
 
 eventRoutes.get("/", eventController.list);
+eventRoutes.get("/:id", eventController.getById);
 
 eventRoutes.post(
   "/",

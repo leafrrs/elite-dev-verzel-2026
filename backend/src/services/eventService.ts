@@ -1,4 +1,5 @@
 import { prisma } from "../lib/prisma";
+import { AppError } from "../lib/AppError";
 
 export class EventService {
   async listAll() {
@@ -9,6 +10,27 @@ export class EventService {
     });
 
     return events;
+  }
+
+  async getById(id: string) {
+    const event = await prisma.event.findUnique({
+      where: { id },
+      include: {
+        seats: {
+          select: {
+            id: true,
+            seatCode: true,
+            status: true
+          }
+        }
+      }
+    });
+
+    if (!event) {
+      throw new AppError("Evento não encontrado.", 404);
+    }
+
+    return event;
   }
 
   async create(data: any, organizerId: string) {

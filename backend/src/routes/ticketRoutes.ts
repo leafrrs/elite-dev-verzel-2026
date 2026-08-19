@@ -5,6 +5,13 @@ import { ensureAuthenticated, ensureRole } from "../middlewares/authMiddleware";
 const ticketRoutes = Router();
 const ticketController = new TicketController();
 
+ticketRoutes.get(
+  "/me",
+  ensureAuthenticated,
+  ensureRole(["CLIENT"]),
+  ticketController.listMyTickets,
+);
+
 ticketRoutes.post(
   "/validate",
   ensureAuthenticated,
