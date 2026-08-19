@@ -1,0 +1,100 @@
+@use '../../styles/variables' as *;
+
+.event-card {
+  background-color: $color-bg-surface;
+  border-radius: $radius-md;
+  overflow: hidden; // Impede a imagem de vazar as bordas
+  border: 1px solid rgba($color-text-secondary, 0.1);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    border-color: rgba($color-text-secondary, 0.3);
+  }
+
+  &__banner {
+    position: relative;
+    width: 100%;
+    height: 180px;
+    background-color: #000;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover; // Preenche mantendo proporção e cortando sobras
+      opacity: 0.9;
+    }
+
+    .event-card__badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background-color: rgba(0, 0, 0, 0.7);
+      color: $color-text-main;
+      padding: 4px 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: $radius-sm;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      backdrop-filter: blur(4px);
+    }
+  }
+
+  &__content {
+    padding: ($space-base * 2.5);
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: ($space-base);
+  }
+
+  &__title {
+    font-size: 1.25rem;
+    color: $color-text-main;
+    line-height: 1.3;
+    margin-bottom: ($space-base * 0.5);
+  }
+
+  &__date, &__location {
+    color: $color-text-secondary;
+    font-size: 0.85rem;
+  }
+
+  &__footer {
+    margin-top: auto; // Joga o footer pro final do card se a descrição for curta
+    padding-top: ($space-base * 2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  &__price {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: $color-accent;
+  }
+}
+
+// Botão secundário compartilhado ou próprio do card
+.btn-secondary {
+  border: 1px solid $color-accent;
+  color: $color-accent;
+  padding: 8px 16px;
+  border-radius: $radius-sm;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: $color-accent;
+    color: #fff;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $color-accent;
+    outline-offset: 2px;
+  }
+}

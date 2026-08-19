@@ -1,0 +1,36 @@
+@use '../styles/variables' as *;
+
+.home-page {
+  &__header {
+    margin-bottom: ($space-base * 5);
+    text-align: center;
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: ($space-base);
+    }
+
+    p {
+      color: $color-text-secondary;
+    }
+  }
+}
+
+// O Grid Responsivo Mágico
+// auto-fill: Tenta colocar o máximo de colunas possíveis
+// minmax(280px, 1fr): A coluna nunca fica menor que 280px. Se sobrar espaço, ela cresce até 1fr.
+.events-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: ($space-base * 3);
+}
+
+.state-message {
+  text-align: center;
+  padding: ($space-base * 6) 0;
+  color: $color-text-secondary;
+
+  &--error {
+    color: #ff4d4d;
+  }
+}

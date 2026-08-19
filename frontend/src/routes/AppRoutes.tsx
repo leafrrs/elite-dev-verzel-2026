@@ -3,6 +3,7 @@ import { MainLayout } from '../layouts/MainLayout';
 import { ProtectedRoute } from './ProtectedRoute';
 
 import { HomePage } from '../pages/HomePage';
+import { EventDetailsPage } from '../pages/EventDetailsPage';
 import { LoginPage } from '../pages/LoginPage';
 import { OrganizerPage } from '../pages/OrganizerPage';
 import { GatePage } from '../pages/GatePage';
@@ -15,6 +16,7 @@ export function AppRoutes() {
         
         {/* Rotas Públicas */}
         <Route path="/" element={<HomePage />} />
+        <Route path="/events/:id" element={<EventDetailsPage />} />
         <Route path="/login" element={<LoginPage />} />
 
         {/* Rotas Protegidas - Organizer (Somente o ORGANIZER acessa) */}
