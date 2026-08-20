@@ -91,6 +91,7 @@ model Ticket {
   id            String       @id @default(uuid())
   ticketCode    String       @unique // Código alfanumérico curto (ex: "VRZ-8X92K") para digitação manual
   secureHash    String       // Assinatura HMAC anti-forja para o QR Code
+  shareToken    String?      @unique // Token imprevisível para rota de compartilhamento
   status        String       @default("VALID") // "VALID" | "USED" | "CANCELLED"
   usedAt        DateTime?    // Momento exato em que a portaria validou o ingresso
 

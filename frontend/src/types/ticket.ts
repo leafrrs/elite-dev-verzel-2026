@@ -23,6 +23,21 @@ export interface TicketDetail {
   seat: TicketSeatSummary | null;
 }
 
+export interface SharedTicket {
+  ticketCode: string;
+  status: TicketStatus;
+  qrPayload: string;
+  event: {
+    title: string;
+    date: string;
+    location: string;
+    bannerUrl?: string;
+  };
+  seat?: {
+    seatCode: string;
+  };
+}
+
 export interface ValidateTicketPayload {
   ticketCode: string;
   secureHash: string;

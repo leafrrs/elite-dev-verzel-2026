@@ -50,4 +50,34 @@ export class TicketController {
       return res.status(500).json({ error: "Erro interno do servidor." });
     }
   }
+
+  async share(req: Request, res: Response) {
+    try {
+      const userId = (req as any).user.id;
+      const { ticketCode } = req.params;
+
+      const result = await ticketService.generateShareToken(userId, ticketCode);
+      return res.status(201).json(result);
+    } catch (error: any) {
+      if (error instanceof AppError) {
+        return res.status(error.statusCode).json({ error: error.message });
+      }
+      console.error(error);
+      return res.status(500).json({ error: "Erro interno do servidor." });
+    }
+  }
+
+  async getShared(req: Request, res: Response) {
+    try {
+      const { shareToken } = req.params;
+      const result = await ticketService.getSharedTicket(shareToken);
+      return res.status(200).json(result);
+    } catch (error: any) {
+      if (error instanceof AppError) {
+        return res.status(error.statusCode).json({ error: error.message });
+      }
+      console.error(error);
+      return res.status(500).json({ error: "Erro interno do servidor." });
+    }
+  }
 }

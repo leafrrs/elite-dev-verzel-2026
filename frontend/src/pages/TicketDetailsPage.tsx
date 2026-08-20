@@ -12,6 +12,10 @@ export function TicketDetailsPage() {
   const [ticket, setTicket] = useState<TicketDetail | null>(null);
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
 
+  const [isSharing, setIsSharing] = useState(false);
+  const [shareLink, setShareLink] = useState('');
+  const [shareError, setShareError] = useState('');
+
   useEffect(() => {
     async function loadTicket() {
       if (!ticketCode) return;
@@ -31,6 +35,25 @@ export function TicketDetailsPage() {
     }
     loadTicket();
   }, [ticketCode]);
+
+  async function handleShare() {
+    setIsSharing(true);
+    setShareError('');
+    try {
+      const { shareToken } = await ticketService.shareTicket(ticket!.ticketCode);
+      const link = `${window.location.origin}/shared/${shareToken}`;
+      setShareLink(link);
+      try {
+        await navigator.clipboard.writeText(link);
+      } catch (e) {
+        // Ignora erro de clipboard, o link já vai estar visível na tela
+      }
+    } catch (err: any) {
+      setShareError(err.data?.error || 'Erro ao gerar link de compartilhamento.');
+    } finally {
+      setIsSharing(false);
+    }
+  }
 
   if (status === 'loading') {
     return <div className="container state-message"><p>Carregando ingresso...</p></div>;
@@ -99,8 +122,19 @@ export function TicketDetailsPage() {
         </div>
       </div>
       
-      <div className="ticket-details-page__actions">
-        <Link to="/tickets" className="btn-secondary">Voltar para Meus Ingressos</Link>
+      <div className="ticket-details-page__actions" style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }}>
+        <button type="button" className="btn-primary" onClick={handleShare} disabled={isSharing}>
+          {isSharing ? 'Gerando link...' : 'Compartilhar ingresso'}
+        </button>
+        {shareLink && (
+          <div style={{ marginTop: '8px', textAlign: 'center' }}>
+            <p style={{ fontSize: '0.9rem', color: '#F5F5F5', marginBottom: '8px' }}>Link copiado para a área de transferência:</p>
+            <input type="text" value={shareLink} readOnly style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #333', background: '#1E1E1E', color: '#FFF' }} />
+          </div>
+        )}
+        {shareError && <p style={{ color: '#D90429', fontSize: '0.9rem' }}>{shareError}</p>}
+
+        <Link to="/tickets" className="btn-secondary" style={{ marginTop: '16px' }}>Voltar para Meus Ingressos</Link>
       </div>
     </div>
   );

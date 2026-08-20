@@ -11,6 +11,7 @@ import { ReservationPage } from '../pages/ReservationPage';
 import { CheckoutPage } from '../pages/CheckoutPage';
 import { MyTicketsPage } from '../pages/MyTicketsPage';
 import { TicketDetailsPage } from '../pages/TicketDetailsPage';
+import { SharedTicketPage } from '../pages/SharedTicketPage';
 
 export function AppRoutes() {
   return (
@@ -22,6 +23,7 @@ export function AppRoutes() {
         <Route path="/" element={<HomePage />} />
         <Route path="/events/:id" element={<EventDetailsPage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/shared/:shareToken" element={<SharedTicketPage />} />
 
         {/* Rotas Protegidas - Client (Comprador) */}
         <Route element={<ProtectedRoute allowedRoles={['CLIENT']} />}>

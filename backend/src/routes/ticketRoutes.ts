@@ -19,4 +19,16 @@ ticketRoutes.post(
   ticketController.Validate,
 );
 
+ticketRoutes.post(
+  "/:ticketCode/share",
+  ensureAuthenticated,
+  ensureRole(["CLIENT"]),
+  ticketController.share,
+);
+
+ticketRoutes.get(
+  "/shared/:shareToken",
+  ticketController.getShared,
+);
+
 export { ticketRoutes };

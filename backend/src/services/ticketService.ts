@@ -91,4 +91,76 @@ export class TicketService {
       message: "ACESSO LIBERADO! Ingresso válido e consumido com sucesso.",
     };
   }
+
+  async generateShareToken(userId: string, ticketCode: string) {
+    const ticket = await prisma.ticket.findUnique({
+      where: { ticketCode }
+    });
+
+    if (!ticket) {
+      throw new AppError("Ingresso não encontrado.", 404);
+    }
+
+    if (ticket.userId !== userId) {
+      throw new AppError("Acesso negado.", 403);
+    }
+
+    // Se já tiver token, reutiliza
+    if (ticket.shareToken) {
+      return { shareToken: ticket.shareToken };
+    }
+
+    const shareToken = crypto.randomBytes(32).toString("hex");
+
+    await prisma.ticket.update({
+      where: { id: ticket.id },
+      data: { shareToken }
+    });
+
+    return { shareToken };
+  }
+
+  async getSharedTicket(shareToken: string) {
+    const ticket = await prisma.ticket.findUnique({
+      where: { shareToken },
+      select: {
+        ticketCode: true,
+        status: true,
+        secureHash: true,
+        eventId: true,
+        event: {
+          select: {
+            title: true,
+            date: true,
+            location: true,
+            bannerUrl: true,
+          }
+        },
+        seat: {
+          select: {
+            seatCode: true,
+          }
+        }
+      }
+    });
+
+    if (!ticket) {
+      throw new AppError("Ingresso compartilhado não encontrado ou link inválido.", 404);
+    }
+
+    // Encapsula o dado sensível para o payload do QR
+    const qrPayload = JSON.stringify({
+      ticketCode: ticket.ticketCode,
+      secureHash: ticket.secureHash,
+      eventId: ticket.eventId
+    });
+
+    return {
+      ticketCode: ticket.ticketCode,
+      status: ticket.status,
+      event: ticket.event,
+      seat: ticket.seat,
+      qrPayload
+    };
+  }
 }
