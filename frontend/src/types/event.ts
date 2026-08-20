@@ -25,3 +25,17 @@ export interface Seat {
 export interface EventDetails extends EventModel {
   seats: Seat[];
 }
+
+// Contrato explícito para criação de eventos no Front-End
+export interface CreateEventPayload {
+  title: string;
+  description?: string;
+  date: string;
+  location: string;
+  price: number;
+  totalCapacity: number;
+  type: EventType;
+  bannerUrl?: string;
+  externalSource?: string;
+  externalId?: string;
+}

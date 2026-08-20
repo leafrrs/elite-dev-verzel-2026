@@ -27,6 +27,67 @@
     }
   }
 
+  &__config {
+    background: $color-bg-surface;
+    padding: ($space-base * 3);
+    border-radius: $radius-md;
+    border: 1px solid rgba($color-text-secondary, 0.2);
+    margin-bottom: ($space-base * 4);
+
+    h2 {
+      margin-bottom: ($space-base * 2);
+    }
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: ($space-base * 2);
+    max-width: 600px;
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: ($space-base * 0.5);
+
+      label {
+        font-weight: 500;
+        font-size: 0.95rem;
+      }
+
+      input, select {
+        padding: $space-base;
+        border: 1px solid rgba($color-text-secondary, 0.4);
+        border-radius: $radius-sm;
+        background: transparent;
+        color: $color-text-main;
+        font-family: inherit;
+
+        &:focus {
+          outline: 2px solid $color-accent;
+          border-color: transparent;
+        }
+        
+        &:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+      }
+    }
+
+    .error-message {
+      color: #e74c3c;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .actions {
+      display: flex;
+      gap: $space-base;
+      margin-top: $space-base;
+    }
+  }
+
   &__status {
     padding: ($space-base * 2);
     text-align: center;
@@ -38,6 +99,19 @@
     &--error {
       color: #e74c3c;
       background: rgba(231, 76, 60, 0.1);
+    }
+
+    &--success {
+      color: #2ecc71;
+      background: rgba(46, 204, 113, 0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: $space-base;
+
+      h2 {
+        color: #2ecc71;
+      }
     }
   }
 
