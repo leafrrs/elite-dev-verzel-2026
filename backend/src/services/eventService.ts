@@ -12,6 +12,30 @@ export class EventService {
     return events;
   }
 
+  async listByOrganizer(organizerId: string) {
+    const events = await prisma.event.findMany({
+      where: { organizerId },
+      orderBy: {
+        createdAt: "desc", // Eventos mais recentes primeiro
+      },
+      select: {
+        id: true,
+        title: true,
+        date: true,
+        location: true,
+        price: true,
+        type: true,
+        totalCapacity: true,
+        availableStock: true,
+        bannerUrl: true,
+        externalSource: true,
+        externalId: true,
+      }
+    });
+
+    return events;
+  }
+
   async getById(id: string) {
     const event = await prisma.event.findUnique({
       where: { id },
@@ -97,5 +121,30 @@ export class EventService {
       });
       return newEvent;
     }
+  }
+
+  async update(id: string, organizerId: string, data: any) {
+    const event = await prisma.event.findUnique({ where: { id } });
+
+    if (!event) {
+      throw new AppError("Evento não encontrado.", 404);
+    }
+
+    if (event.organizerId !== organizerId) {
+      throw new AppError("Você não tem permissão para editar este evento.", 403);
+    }
+
+    const updatedEvent = await prisma.event.update({
+      where: { id },
+      data: {
+        ...(data.title && { title: data.title }),
+        ...(data.description !== undefined && { description: data.description }),
+        ...(data.date && { date: new Date(data.date) }),
+        ...(data.location && { location: data.location }),
+        ...(data.price !== undefined && { price: data.price }),
+      },
+    });
+
+    return updatedEvent;
   }
 }

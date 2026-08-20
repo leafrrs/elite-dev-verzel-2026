@@ -39,3 +39,12 @@ export interface CreateEventPayload {
   externalSource?: string;
   externalId?: string;
 }
+
+// Contrato explícito para edição de eventos
+export interface UpdateEventPayload {
+  title?: string;
+  description?: string;
+  date?: string;
+  location?: string;
+  price?: number;
+}

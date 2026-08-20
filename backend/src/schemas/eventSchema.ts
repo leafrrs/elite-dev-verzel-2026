@@ -20,3 +20,13 @@ export const createEventSchema = z.object({
 export const getEventByIdParamsSchema = z.object({
   id: z.string().uuid("ID do evento inválido (deve ser um UUID).")
 });
+
+export const updateEventSchema = z.object({
+  title: z.string().trim().min(1, "O título é obrigatório.").optional(),
+  description: z.string().trim().optional(),
+  date: z.string().datetime("Data inválida. Use o formato ISO 8601 UTC (ex: 2024-12-01T20:00:00Z).").refine((val) => new Date(val) > new Date(), {
+    message: "A data do evento deve estar no futuro."
+  }).optional(),
+  location: z.string().trim().min(1, "A localização é obrigatória.").optional(),
+  price: z.number().positive("O preço deve ser maior que zero.").optional(),
+}).strict("Campos não autorizados foram enviados.");

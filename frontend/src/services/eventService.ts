@@ -1,10 +1,17 @@
 import { fetchApi } from './api';
-import type { EventModel, EventDetails, CreateEventPayload } from '../types/event';
+import type { EventModel, EventDetails, CreateEventPayload, UpdateEventPayload } from '../types/event';
 
 export const eventService = {
   // Lista o catálogo de eventos públicos
   async getEvents(): Promise<EventModel[]> {
     return fetchApi<EventModel[]>('/events', {
+      method: 'GET',
+    });
+  },
+
+  // Lista os eventos restritos ao organizador autenticado
+  async getMyEvents(): Promise<EventModel[]> {
+    return fetchApi<EventModel[]>('/events/me', {
       method: 'GET',
     });
   },
@@ -20,6 +27,14 @@ export const eventService = {
   async createEvent(data: CreateEventPayload): Promise<EventModel> {
     return fetchApi<EventModel>('/events', {
       method: 'POST',
+      body: JSON.stringify(data)
+    });
+  },
+
+  // Atualiza um evento existente
+  async updateEvent(id: string, data: UpdateEventPayload): Promise<EventModel> {
+    return fetchApi<EventModel>(`/events/${id}`, {
+      method: 'PATCH',
       body: JSON.stringify(data)
     });
   }

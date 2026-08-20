@@ -230,4 +230,102 @@
       }
     }
   }
+
+  &__my-events {
+    margin-top: ($space-base * 6);
+    padding-top: ($space-base * 4);
+    border-top: 1px solid rgba($color-text-secondary, 0.2);
+
+    h2 {
+      margin-bottom: ($space-base * 3);
+    }
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    gap: ($space-base * 2);
+
+    &-item {
+      display: flex;
+      flex-direction: column;
+      background: $color-bg-surface;
+      border: 1px solid rgba($color-text-secondary, 0.2);
+      border-radius: $radius-md;
+      overflow: hidden;
+
+      @media (min-width: 768px) {
+        flex-direction: row;
+      }
+
+      img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        
+        @media (min-width: 768px) {
+          width: 150px;
+          height: 100%;
+        }
+      }
+
+      .info {
+        padding: ($space-base * 2);
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+
+        h3 {
+          margin: 0 0 $space-base 0;
+          font-size: 1.3rem;
+          color: $color-text-main;
+        }
+
+        .meta {
+          color: $color-text-secondary;
+          font-size: 0.95rem;
+          line-height: 1.6;
+          margin-bottom: ($space-base * 2);
+          flex: 1;
+        }
+
+        .actions {
+          display: flex;
+          gap: $space-base;
+          
+          button {
+            font-size: 0.9rem;
+            padding: ($space-base * 0.8) ($space-base * 1.5);
+          }
+        }
+      }
+      
+      .organizer-page__edit-form {
+        display: flex;
+        flex-direction: column;
+        gap: $space-base;
+        width: 100%;
+
+        .form-group {
+          margin-bottom: $space-base;
+          label {
+            font-size: 0.9rem;
+          }
+          input {
+            padding: ($space-base * 0.8);
+          }
+        }
+
+        .error-message {
+          color: $color-accent;
+          font-size: 0.9rem;
+          margin-bottom: $space-base;
+        }
+
+        .actions {
+          margin-top: $space-base;
+        }
+      }
+    }
+  }
 }
