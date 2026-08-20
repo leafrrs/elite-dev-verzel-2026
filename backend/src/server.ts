@@ -6,9 +6,14 @@ import { reservationRoutes } from "./routes/reservationRoutes";
 import { ticketRoutes } from "./routes/ticketRoutes";
 import { tmdbRoutes } from "./routes/tmdbRoutes";
 
+import { env } from "./config/env";
+
 const app = express();
 
-app.use(cors());
+const corsOptions = {
+  origin: env.NODE_ENV === "production" ? env.FRONTEND_URL : "*",
+};
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use("/auth", authRoutes);
 app.use("/events", eventRoutes);
