@@ -90,8 +90,51 @@
     }
   }
 
-  &__form {
+  &__actions-panel {
     padding: ($space-base * 3);
+  }
+
+  &__next {
+    display: flex;
+    justify-content: center;
+    button {
+      padding: ($space-base * 1.5) ($space-base * 3);
+      font-size: 1.1rem;
+    }
+  }
+
+  &__scanner-section {
+    margin-bottom: ($space-base * 2);
+  }
+
+  &__divider {
+    text-align: center;
+    position: relative;
+    margin: ($space-base * 2) 0;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background-color: rgba($color-text-secondary, 0.3);
+      z-index: 1;
+    }
+
+    span {
+      position: relative;
+      background-color: $color-bg-surface;
+      padding: 0 $space-base;
+      color: $color-text-secondary;
+      font-weight: bold;
+      font-size: 0.9rem;
+      z-index: 2;
+    }
+  }
+
+  &__form {
     display: flex;
     flex-direction: column;
     gap: ($space-base * 2.5);
