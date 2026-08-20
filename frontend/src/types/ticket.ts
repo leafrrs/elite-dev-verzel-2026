@@ -22,3 +22,13 @@ export interface TicketDetail {
   event: TicketEventSummary;
   seat: TicketSeatSummary | null;
 }
+
+export interface ValidateTicketPayload {
+  ticketCode: string;
+  secureHash: string;
+  eventId: string;
+}
+
+export interface ValidateTicketResponse {
+  message: string;
+}
