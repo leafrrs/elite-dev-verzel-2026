@@ -48,7 +48,7 @@ export function CheckoutPage() {
     <div className="container checkout-page">
       <header className="checkout-page__header">
         <h1>Checkout Simulado</h1>
-        <p>Apenas para fins de avaliação. Escolha o resultado da transação.</p>
+        <p>Pagamento simulado para fins de avaliação.</p>
       </header>
 
       <div className="checkout-page__content">
@@ -58,11 +58,6 @@ export function CheckoutPage() {
             ID da Reserva: <br />
             <strong>{reservationId}</strong>
           </p>
-          <div className="checkout-alert">
-            <p>
-              ⚠️ <strong>Limitação Técnica Atual:</strong> Como o Backend ainda não possui a rota <code>GET /reservations/:id</code>, não podemos buscar e exibir o valor exato, nome do evento ou cadeira diretamente nesta tela após um F5 de forma segura e confiável (sem depender de state de rota).
-            </p>
-          </div>
         </section>
 
         {status === 'error' && (
@@ -80,30 +75,32 @@ export function CheckoutPage() {
                 <p><strong>Código do Ingresso:</strong> {ticket.ticketCode}</p>
               </div>
             )}
-            <button className="btn-primary" onClick={() => alert('Visualização do Ticket completo na Fase F8')}>
-              Ver ingresso completo
-            </button>
+            {ticket && (
+              <Link to={`/tickets/${ticket.ticketCode}`} className="btn-primary" style={{ display: 'inline-block' }}>
+                Ver ingresso completo
+              </Link>
+            )}
           </div>
         )}
 
         {status === 'success_refused' && (
           <div className="refused-message">
-            <h2>Pagamento Recusado ❌</h2>
-            <p>A transação não foi aprovada. A reserva foi cancelada e o assento foi liberado para o público.</p>
+            <h2>Pagamento recusado</h2>
+            <p>A transação não foi aprovada. O assento ou ingresso foi liberado e você pode realizar uma nova reserva.</p>
             <Link to="/" className="btn-secondary">Voltar aos Eventos</Link>
           </div>
         )}
 
         {(status === 'idle' || status === 'processing' || status === 'error') && (
           <section className="checkout-actions">
-            <h3>Simular Transação PIX / Cartão</h3>
+            <h3>Simular Transação</h3>
             <div className="checkout-actions__buttons">
               <button 
                 className="btn-success" 
                 disabled={status === 'processing'}
                 onClick={() => handlePayment(true)}
               >
-                {status === 'processing' ? 'Processando...' : 'Simular Aprovação'}
+                {status === 'processing' ? 'Processando...' : 'Simular pagamento aprovado'}
               </button>
               
               <button 
@@ -111,7 +108,7 @@ export function CheckoutPage() {
                 disabled={status === 'processing'}
                 onClick={() => handlePayment(false)}
               >
-                Simular Recusa
+                Simular pagamento recusado
               </button>
             </div>
           </section>

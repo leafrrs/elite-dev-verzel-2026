@@ -1,0 +1,109 @@
+@use '../styles/variables' as *;
+
+.my-tickets {
+  &__header {
+    text-align: center;
+    margin-bottom: ($space-base * 4);
+    
+    h1 {
+      font-size: 2rem;
+      margin-bottom: ($space-base);
+    }
+    
+    p {
+      color: $color-text-secondary;
+    }
+  }
+}
+
+.tickets-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: ($space-base * 3);
+}
+
+.ticket-card {
+  background-color: $color-bg-surface;
+  border-radius: $radius-md;
+  border: 1px solid rgba($color-text-secondary, 0.2);
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+  overflow: hidden;
+
+  &:hover {
+    transform: translateY(-4px);
+    border-color: rgba($color-text-secondary, 0.4);
+  }
+
+  &--used, &--cancelled {
+    opacity: 0.7;
+    filter: grayscale(100%);
+  }
+
+  &__header {
+    background-color: rgba(#000, 0.3);
+    padding: ($space-base * 2) ($space-base * 2.5);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: ($space-base);
+    border-bottom: 1px dashed rgba($color-text-secondary, 0.3);
+
+    h3 {
+      font-size: 1.1rem;
+      color: $color-text-main;
+      margin: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  &__status {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: $radius-sm;
+    background-color: $color-accent;
+    color: #fff;
+    text-transform: uppercase;
+  }
+
+  &--used &__status { background-color: #7f8c8d; }
+  &--cancelled &__status { background-color: #c0392b; }
+
+  &__body {
+    padding: ($space-base * 2.5);
+    display: flex;
+    flex-direction: column;
+    gap: ($space-base);
+
+    p {
+      margin: 0;
+      font-size: 0.95rem;
+      color: $color-text-secondary;
+
+      strong {
+        color: $color-text-main;
+      }
+    }
+  }
+
+  &__footer {
+    padding: ($space-base * 2) ($space-base * 2.5);
+    background-color: rgba(#000, 0.2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid rgba($color-text-secondary, 0.1);
+  }
+
+  &__code {
+    font-family: monospace;
+    color: $color-text-secondary;
+    font-weight: bold;
+    letter-spacing: 1px;
+  }
+}

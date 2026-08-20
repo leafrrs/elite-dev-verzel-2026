@@ -50,6 +50,16 @@ export function Header() {
               Portaria
             </NavLink>
           )}
+
+          {/* CLIENT: Vê Meus Ingressos */}
+          {user?.role === 'CLIENT' && (
+            <NavLink 
+              to="/tickets" 
+              className={({ isActive }) => isActive ? "header__link header__link--active" : "header__link"}
+            >
+              Meus Ingressos
+            </NavLink>
+          )}
           
           {isAuthenticated ? (
             <div className="header__user-menu">

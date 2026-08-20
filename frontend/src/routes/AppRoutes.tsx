@@ -9,6 +9,8 @@ import { OrganizerPage } from '../pages/OrganizerPage';
 import { GatePage } from '../pages/GatePage';
 import { ReservationPage } from '../pages/ReservationPage';
 import { CheckoutPage } from '../pages/CheckoutPage';
+import { MyTicketsPage } from '../pages/MyTicketsPage';
+import { TicketDetailsPage } from '../pages/TicketDetailsPage';
 
 export function AppRoutes() {
   return (
@@ -25,6 +27,8 @@ export function AppRoutes() {
         <Route element={<ProtectedRoute allowedRoles={['CLIENT']} />}>
           <Route path="/events/:id/reserve" element={<ReservationPage />} />
           <Route path="/checkout/:reservationId" element={<CheckoutPage />} />
+          <Route path="/tickets" element={<MyTicketsPage />} />
+          <Route path="/tickets/:ticketCode" element={<TicketDetailsPage />} />
         </Route>
 
         {/* Rotas Protegidas - Organizer (Somente o ORGANIZER acessa) */}
