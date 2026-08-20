@@ -51,3 +51,22 @@ Este documento registra de forma transparente as decisões técnicas importantes
 - **Decisão tomada:** Zod aplicado nas rotas, `AppError` mapeado nos blocos `catch` de todos os Controllers, e falha rígida de inicialização para Secrets faltantes.
 - **Por que aceitei:** A distinção entre validação de formato (Zod) e regra de negócio (Service) manteve a arquitetura limpa. Respostas claras em HTTP 400 ajudam no Front-End, e o Fail Fast evita servidores zumbis em produção.
 - **O que foi implementado:** `src/config/env.ts` valida as chaves. ZodSchemas criados para as 4 rotas de mutação usando `safeParse`. Todos os serviços trocados para lançar `AppError` respeitando os códigos HTTP correspondentes (400, 401, 403, 404, 409).
+
+---
+
+### Decisão 06: Arquitetura e sessão no Front-End
+
+- **Problema:** Precisávamos escolher uma stack robusta mas simples para o MVP do front-end sem depender de complexidade excessiva.
+- **Decisão tomada:** Utilizar React com Vite, Fetch nativo e Context API. Optou-se por armazenar o JWT no localStorage.
+- **Por que aceitei:** Porque o uso do fetch e Context API limpa as dependências. A escolha do localStorage é uma decisão consciente de MVP com o risco reconhecido de XSS, assumindo o trade-off pela simplicidade temporária da Fase 1.
+- **O que foi implementado:** Estrutura gerada com Vite, AuthContext.tsx e injetor automático de header no pi.ts.
+
+---
+
+### Decisão 07: Navegação, autorização e consistência
+
+- **Problema:** Proteger as rotas de forma limpa e impedir erros em caso de URL compartilhada e concorrência na compra.
+- **Decisão tomada:** Adotar ProtectedRoute para roteamento condicional (UX), mas não delegar a segurança final para o cliente.
+- **Por que aceitei:** A clareza de separar o estado do Domínio (no Prisma via erro 409) do estado da Interface (UI transitória). O Front-End apenas exibe e guia o usuário, enquanto a validação e autorização ocorrem no Backend, garantindo que mesmo se houver F5 (URLs recuperáveis), a segurança e o estado real permaneçam íntegros.
+- **O que foi implementado:** Proteção de papéis em React Router, tratamento catch-all para HTTP 409 em ReservationPage.tsx e recuperação semântica após falha (liberando a UI do ingresso perdido).
+

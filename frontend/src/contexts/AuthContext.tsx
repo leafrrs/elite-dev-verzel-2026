@@ -15,13 +15,22 @@ const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 export function AuthProvider({ children }: { children: ReactNode }) {
   // Inicialização preguiçosa (lazy init): só lê do localStorage no primeiro render
   const [user, setUser] = useState<User | null>(() => {
-    const storedUser = localStorage.getItem('@VerzelEvents:user');
-    return storedUser ? JSON.parse(storedUser) : null;
+    try {
+      const storedUser = localStorage.getItem('@VerzelEvents:user');
+      return storedUser ? JSON.parse(storedUser) : null;
+    } catch {
+      // Se os dados estiverem corrompidos no localStorage, remove e inicializa vazio.
+      localStorage.removeItem('@VerzelEvents:user');
+      return null;
+    }
   });
 
   const [token, setToken] = useState<string | null>(() => {
     return localStorage.getItem('@VerzelEvents:token') || null;
   });
+
+  // Autenticação válida apenas se tivermos dados do user e o token de rede presentes
+  const isAuthenticated = !!user && !!token;
 
   // Função que atualiza o estado React E salva na memória do navegador
   function signIn(data: AuthResponse) {
@@ -44,7 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       value={{
         user,
         token,
-        isAuthenticated: !!user,
+        isAuthenticated,
         signIn,
         signOut,
       }}

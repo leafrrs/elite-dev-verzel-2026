@@ -1,7 +1,7 @@
 // import.meta.env é a forma que o Vite usa para acessar variáveis do .env
 const API_URL = import.meta.env.VITE_API_URL;
 
-export async function fetchApi(endpoint: string, options: RequestInit = {}) {
+export async function fetchApi<T = any>(endpoint: string, options: RequestInit = {}): Promise<T> {
   // Busca o token persistido (não acopla o serviço ao ciclo de vida do React)
   const token = localStorage.getItem('@VerzelEvents:token');
 
@@ -27,7 +27,7 @@ export async function fetchApi(endpoint: string, options: RequestInit = {}) {
     };
   }
 
-  if (response.status === 204) return null;
+  if (response.status === 204) return null as T;
   
-  return response.json();
+  return response.json() as Promise<T>;
 }

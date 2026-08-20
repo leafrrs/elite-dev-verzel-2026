@@ -22,14 +22,20 @@ Projeto Full Stack em desenvolvimento para o Desafio Elite Dev da Verzel.
 ✅ Validação de entrada com Zod
 ✅ Tratamento semântico de erros
 
-🚧 Front-End React
-🚧 QR Code visual
-🚧 Leitura de QR pela câmera
-🚧 Área "Meus ingressos"
-🚧 Compartilhamento por link
-🚧 Integração TMDb/Ticketmaster
-🚧 Deploy
-🚧 Testes automatizados
+✅ Front-End React (Vite + TypeScript)
+✅ React Router
+✅ Sass (Identity Dark Editorial)
+✅ Autenticação, sessão (localStorage) e rotas protegidas (roles)
+✅ Catálogo de eventos e detalhes de evento
+✅ Reserva SEATED e GENERAL_ADMISSION
+✅ Tratamento de concorrência e checkout (pagamento simulado)
+❌ Meus Ingressos
+❌ QR visual
+❌ Portaria Front-End completa
+❌ API externa e Câmera
+❌ Compartilhamento
+❌ Deploy
+❌ Testes automatizados
 
 ---
 
@@ -47,7 +53,12 @@ Projeto Full Stack em desenvolvimento para o Desafio Elite Dev da Verzel.
 * Node Crypto
 
 ### Front-End
-* Planejado / Próxima etapa
+* React 18
+* Vite
+* TypeScript
+* React Router DOM
+* Sass (Arquitetura Dark Editorial)
+* Fetch API Nativa
 
 ---
 

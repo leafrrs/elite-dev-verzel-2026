@@ -3,6 +3,11 @@ export interface CreateReservationPayload {
   seatCode?: string;
 }
 
+export interface CreateReservationResponse {
+  message: string;
+  reservation: Reservation;
+}
+
 export interface Reservation {
   id: string;
   eventId: string;

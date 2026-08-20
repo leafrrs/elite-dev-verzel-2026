@@ -54,6 +54,12 @@ export function EventDetailsPage() {
 
   const fallback = 'data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%221200%22%20height%3D%22400%22%20viewBox%3D%220%200%201200%20400%22%3E%3Crect%20width%3D%221200%22%20height%3D%22400%22%20fill%3D%22%232A2A2A%22%2F%3E%3Ctext%20x%3D%22600%22%20y%3D%22200%22%20fill%3D%22%23555555%22%20font-family%3D%22sans-serif%22%20font-size%3D%2224%22%20text-anchor%3D%22middle%22%20alignment-baseline%3D%22middle%22%3ESem%20imagem%3C%2Ftext%3E%3C%2Fsvg%3E';
 
+  function handleImageError(e: React.SyntheticEvent<HTMLImageElement, Event>) {
+    if (e.currentTarget.src !== fallback) {
+      e.currentTarget.src = fallback;
+    }
+  }
+
   function handleReservationClick() {
     if (!isAuthenticated) {
       navigate('/login');
@@ -65,7 +71,11 @@ export function EventDetailsPage() {
   return (
     <div className="container event-details">
       <div className="event-details__banner">
-        <img src={event.bannerUrl || fallback} alt={`Banner de ${event.title}`} />
+        <img 
+          src={event.bannerUrl || fallback} 
+          alt={`Banner de ${event.title}`} 
+          onError={handleImageError}
+        />
       </div>
 
       <div className="event-details__main">
