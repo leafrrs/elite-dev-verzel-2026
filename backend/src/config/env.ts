@@ -14,5 +14,6 @@ function requireEnv(key: string): string {
 export const env = {
   JWT_SECRET: requireEnv("JWT_SECRET"),
   QR_SECRET_KEY: requireEnv("QR_SECRET_KEY"),
+  TMDB_ACCESS_TOKEN: requireEnv("TMDB_ACCESS_TOKEN"),
   NODE_ENV: process.env.NODE_ENV || "development",
 };
