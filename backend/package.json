@@ -7,11 +7,18 @@
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
+    "test": "vitest run",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "seed": "tsx prisma/seed.ts"
   },
-  "keywords": ["express", "typescript", "prisma", "events", "verzel"],
+  "keywords": [
+    "express",
+    "typescript",
+    "prisma",
+    "events",
+    "verzel"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
@@ -34,6 +41,7 @@
     "@types/qrcode": "^1.5.5",
     "prisma": "^5.10.2",
     "tsx": "^4.7.1",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "vitest": "^4.1.11"
   }
 }
