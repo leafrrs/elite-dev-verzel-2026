@@ -1,0 +1,151 @@
+@use '../styles/variables' as *;
+
+.checkout-page {
+  max-width: 600px;
+  
+  &__header {
+    text-align: center;
+    margin-bottom: ($space-base * 4);
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: ($space-base);
+    }
+
+    p {
+      color: $color-text-secondary;
+    }
+  }
+
+  &__content {
+    background-color: $color-bg-surface;
+    border: 1px solid rgba($color-text-secondary, 0.1);
+    border-radius: $radius-md;
+    padding: ($space-base * 4);
+    display: flex;
+    flex-direction: column;
+    gap: ($space-base * 4);
+  }
+}
+
+.checkout-summary {
+  h2 {
+    font-size: 1.25rem;
+    margin-bottom: ($space-base * 2);
+  }
+
+  p {
+    color: $color-text-secondary;
+    line-height: 1.5;
+    word-break: break-all;
+
+    strong {
+      color: $color-text-main;
+    }
+  }
+}
+
+.checkout-alert {
+  margin-top: ($space-base * 3);
+  padding: ($space-base * 2);
+  background-color: rgba(#f39c12, 0.1);
+  border-left: 3px solid #f39c12;
+  border-radius: $radius-sm;
+
+  p {
+    color: #e67e22;
+    font-size: 0.9rem;
+    margin: 0;
+  }
+}
+
+.checkout-actions {
+  h3 {
+    font-size: 1.1rem;
+    margin-bottom: ($space-base * 2);
+  }
+
+  &__buttons {
+    display: flex;
+    flex-direction: column;
+    gap: ($space-base * 2);
+  }
+
+  button {
+    padding: ($space-base * 2);
+    border-radius: $radius-sm;
+    font-weight: 600;
+    font-size: 1.05rem;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+
+    &:hover:not(:disabled) {
+      opacity: 0.9;
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+
+  .btn-success {
+    background-color: #27ae60;
+    color: white;
+  }
+
+  .btn-danger {
+    background-color: transparent;
+    border: 1px solid #c0392b;
+    color: #e74c3c;
+
+    &:hover:not(:disabled) {
+      background-color: rgba(#c0392b, 0.1);
+    }
+  }
+}
+
+.success-message {
+  text-align: center;
+  padding: ($space-base * 3) 0;
+
+  h2 {
+    color: #27ae60;
+    margin-bottom: ($space-base);
+  }
+
+  p {
+    color: $color-text-secondary;
+    margin-bottom: ($space-base * 3);
+  }
+
+  .ticket-preview {
+    background-color: $color-bg-primary;
+    padding: ($space-base * 2);
+    border-radius: $radius-sm;
+    margin-bottom: ($space-base * 3);
+    border: 1px dashed rgba($color-text-secondary, 0.3);
+
+    p {
+      margin: 0;
+      font-family: monospace;
+      font-size: 1.1rem;
+    }
+  }
+}
+
+.refused-message {
+  text-align: center;
+  padding: ($space-base * 3) 0;
+
+  h2 {
+    color: #e74c3c;
+    margin-bottom: ($space-base);
+  }
+
+  p {
+    color: $color-text-secondary;
+    margin-bottom: ($space-base * 4);
+  }
+}

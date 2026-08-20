@@ -11,3 +11,22 @@ export interface Reservation {
   totalAmount: number;
   status: 'PENDING' | 'CONFIRMED' | 'REFUSED';
 }
+
+export interface PaymentPayload {
+  approved: boolean;
+}
+
+export interface Ticket {
+  id: string;
+  ticketCode: string;
+  secureHash: string; // Apenas para debug/entendimento nesta fase
+  eventId: string;
+  userId: string;
+  reservationId: string;
+  seatId: string | null;
+}
+
+export interface PaymentResponse {
+  message: string;
+  ticket?: Ticket;
+}
