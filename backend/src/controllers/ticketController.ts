@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { TicketService } from "../services/ticketService";
 import { AppError } from "../lib/AppError";
-import { validateTicketSchema } from "../schemas/ticketSchema";
+import { validateTicketSchema, validateManualTicketSchema } from "../schemas/ticketSchema";
 
 const ticketService = new TicketService();
 
@@ -37,6 +37,35 @@ export class TicketController {
       const result = await ticketService.validateTicket(
         ticketCode,
         secureHash,
+        eventId
+      );
+
+      return res.status(200).json(result);
+    } catch (error: any) {
+      if (error instanceof AppError) {
+        return res.status(error.statusCode).json({ error: error.message });
+      }
+
+      console.error(error);
+      return res.status(500).json({ error: "Erro interno do servidor." });
+    }
+  }
+
+  async validateManual(req: Request, res: Response) {
+    try {
+      const validation = validateManualTicketSchema.safeParse(req.body);
+
+      if (!validation.success) {
+        return res.status(400).json({
+          error: "Dados inválidos.",
+          details: validation.error.flatten().fieldErrors
+        });
+      }
+
+      const { ticketCode, eventId } = validation.data;
+
+      const result = await ticketService.validateManualTicket(
+        ticketCode,
         eventId
       );
 

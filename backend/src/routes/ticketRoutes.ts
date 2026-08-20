@@ -20,6 +20,13 @@ ticketRoutes.post(
 );
 
 ticketRoutes.post(
+  "/validate/manual",
+  ensureAuthenticated,
+  ensureRole(["GATE_STAFF"]),
+  ticketController.validateManual,
+);
+
+ticketRoutes.post(
   "/:ticketCode/share",
   ensureAuthenticated,
   ensureRole(["CLIENT"]),

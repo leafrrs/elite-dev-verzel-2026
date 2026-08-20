@@ -14,7 +14,6 @@ export function GatePage() {
   const [selectedEventId, setSelectedEventId] = useState<string>('');
   
   const [ticketCode, setTicketCode] = useState('');
-  const [secureHash, setSecureHash] = useState('');
   
   const [status, setStatus] = useState<ValidationState>('idle');
   const [feedbackMsg, setFeedbackMsg] = useState('');
@@ -35,31 +34,15 @@ export function GatePage() {
     loadEvents();
   }, []);
 
-  // 2. Validação unificada (tanto Manual quanto via Câmera chamam esta função pura)
-  async function performValidation(code: string, hash: string) {
-    if (!selectedEventId || !code || !hash) return;
-
+  function handleValidationResult(promise: Promise<any>) {
     setStatus('processing');
     setFeedbackMsg('Processando...');
 
-    try {
-      const response = await ticketService.validateTicket({
-        ticketCode: code,
-        secureHash: hash,
-        // CRÍTICO: Sempre usamos o evento que o Porteiro selecionou no <select>.
-        // Nunca confiamos cegamente no eventId que vem escrito no QR Code, 
-        // para evitar que o ingresso de um evento abra a catraca de outro.
-        eventId: selectedEventId 
-      });
-      
+    promise.then(response => {
       setStatus('success');
       setFeedbackMsg(response.message || 'INGRESSO VÁLIDO');
-      
-      // Limpa os inputs manuais
       setTicketCode('');
-      setSecureHash('');
-      
-    } catch (err: any) {
+    }).catch(err => {
       const statusHttp = err.status;
       const dataMsg = err.data?.error || 'Erro desconhecido';
 
@@ -76,13 +59,18 @@ export function GatePage() {
         setStatus('error_invalid');
         setFeedbackMsg(dataMsg);
       }
-    }
+    });
   }
 
   // Tratador do Formulário Manual
   function handleManualSubmit(e: FormEvent) {
     e.preventDefault();
-    performValidation(ticketCode, secureHash);
+    if (!selectedEventId || !ticketCode) return;
+    
+    handleValidationResult(ticketService.validateManualTicket({
+      ticketCode,
+      eventId: selectedEventId
+    }));
   }
 
   // Tratador da Câmera (Scanner)
@@ -99,8 +87,11 @@ export function GatePage() {
         return;
       }
 
-      // Se passou na guarda, as chaves existem. Injeta na orquestração unificada.
-      performValidation(payload.ticketCode, payload.secureHash);
+      handleValidationResult(ticketService.validateTicket({
+        ticketCode: payload.ticketCode,
+        secureHash: payload.secureHash,
+        eventId: selectedEventId 
+      }));
 
     } catch (error) {
       // Se não for JSON (ex: leu um cardápio ou link de wifi), captura o erro sem quebrar
@@ -113,7 +104,6 @@ export function GatePage() {
     setStatus('idle');
     setFeedbackMsg('');
     setTicketCode('');
-    setSecureHash('');
   }
 
   return (
@@ -148,13 +138,13 @@ export function GatePage() {
           {status === 'processing' && <span>Processando...</span>}
           {status === 'success' && (
             <div className="feedback-content">
-              <span className="icon">✅</span>
+              <span className="icon">✓</span>
               <strong>{feedbackMsg}</strong>
             </div>
           )}
           {(status === 'error_invalid' || status === 'error_used' || status === 'error_wrong_event') && (
             <div className="feedback-content">
-              <span className="icon">❌</span>
+              <span className="icon">✕</span>
               <strong>{feedbackMsg}</strong>
             </div>
           )}
@@ -191,19 +181,6 @@ export function GatePage() {
                     value={ticketCode}
                     onChange={e => setTicketCode(e.target.value)}
                     placeholder="Ex: VRZ-8X92K"
-                    required
-                    disabled={status === 'processing'}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="secureHash">Hash de Segurança (secureHash)</label>
-                  <input 
-                    id="secureHash"
-                    type="text" 
-                    value={secureHash}
-                    onChange={e => setSecureHash(e.target.value)}
-                    placeholder="Hash extraído do QR Code..."
                     required
                     disabled={status === 'processing'}
                   />

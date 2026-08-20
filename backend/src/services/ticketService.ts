@@ -63,15 +63,29 @@ export class TicketService {
     }
 
     if (!ticket || !isHashValid) {
-      throw new AppError("Ingresso inválido.", 400); // 400 (ou 403) sem dar dicas do motivo exato
+      throw new AppError("Ingresso inválido.", 400); 
     }
 
-    // 3. Validação de Contexto: O Evento bate com a localização do segurança?
+    return await this._consumeTicket(ticket, gateEventId);
+  }
+
+  async validateManualTicket(ticketCode: string, gateEventId: string) {
+    const ticket = await prisma.ticket.findUnique({
+      where: { ticketCode },
+    });
+
+    if (!ticket) {
+      throw new AppError("Ingresso não encontrado.", 404);
+    }
+
+    return await this._consumeTicket(ticket, gateEventId);
+  }
+
+  private async _consumeTicket(ticket: any, gateEventId: string) {
     if (ticket.eventId !== gateEventId) {
       throw new AppError("Este ingresso pertence a outro evento.", 403);
     }
 
-    // 4. Barreira Atômica (Previne entrada dupla simultânea)
     const updateResult = await prisma.ticket.updateMany({
       where: {
         id: ticket.id,
@@ -84,7 +98,7 @@ export class TicketService {
     });
 
     if (updateResult.count === 0) {
-      throw new AppError("Este ingresso já foi utilizado para entrar no evento!", 409);
+      throw new AppError("Este ingresso já foi utilizado ou está cancelado!", 409);
     }
 
     return {

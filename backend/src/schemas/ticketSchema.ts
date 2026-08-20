@@ -5,3 +5,8 @@ export const validateTicketSchema = z.object({
   secureHash: z.string().trim().min(1, "O hash de segurança é obrigatório."),
   eventId: z.string().uuid("ID do evento inválido.")
 });
+
+export const validateManualTicketSchema = z.object({
+  ticketCode: z.string().trim().min(1, "O código do ingresso é obrigatório."),
+  eventId: z.string().uuid("ID do evento inválido.")
+});

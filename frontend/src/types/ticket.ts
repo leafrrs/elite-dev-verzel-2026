@@ -44,6 +44,11 @@ export interface ValidateTicketPayload {
   eventId: string;
 }
 
+export interface ValidateManualTicketPayload {
+  ticketCode: string;
+  eventId: string;
+}
+
 export interface ValidateTicketResponse {
   message: string;
 }

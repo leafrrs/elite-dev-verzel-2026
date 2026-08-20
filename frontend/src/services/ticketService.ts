@@ -1,5 +1,5 @@
 import { fetchApi } from './api';
-import type { TicketDetail, ValidateTicketPayload, ValidateTicketResponse, SharedTicket } from '../types/ticket';
+import type { TicketDetail, ValidateTicketPayload, ValidateManualTicketPayload, ValidateTicketResponse, SharedTicket } from '../types/ticket';
 
 export const ticketService = {
   // Retorna a lista de tickets do usuário logado
@@ -9,9 +9,17 @@ export const ticketService = {
     });
   },
 
-  // Valida um ingresso na portaria
+  // Valida um ticket via API (consumo atômico) pela portaria via QR Code
   async validateTicket(payload: ValidateTicketPayload): Promise<ValidateTicketResponse> {
     return fetchApi<ValidateTicketResponse>('/tickets/validate', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
+
+  // Valida um ticket via API pela portaria via Código Manual
+  async validateManualTicket(payload: ValidateManualTicketPayload): Promise<ValidateTicketResponse> {
+    return fetchApi<ValidateTicketResponse>('/tickets/validate/manual', {
       method: 'POST',
       body: JSON.stringify(payload),
     });
