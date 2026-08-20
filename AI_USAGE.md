@@ -1,72 +1,54 @@
-# Registro de Uso de Inteligência Artificial — Desafio Elite Dev (Verzel)
+# Uso de IA no desenvolvimento
 
-Este documento registra de forma transparente as decisões técnicas importantes tomadas com o auxílio da Inteligência Artificial (Google Antigravity/Gemini) durante a consolidação do Back-End.
+## Ferramentas utilizadas
 
----
+- ChatGPT
+- Antigravity
+- Modelos LLM utilizados pelo ecossistema do Antigravity
 
-### Decisão 01: Modelagem de reserva e assento
+## Como a IA foi utilizada
 
-- **Problema:** A tabela de `Reservation` não possuía uma ligação direta com o assento (`seatId`), o que dificultava saber exatamente qual cadeira o usuário estava reservando.
-- **Sugestão da IA:** Adicionar o `seatId` opcional em `Reservation`, criando uma relação direta, mantendo a tabela `Seat` apenas para o status físico.
-- **Decisão tomada:** Adicionar `seatId` opcional em `Reservation` e permitir um array de reservas em `Seat`.
-- **Por que aceitei:** Porque isso garante o histórico de quem tentou reservar a cadeira e permite que a mesma tabela de reservas seja utilizada para eventos sem cadeira marcada (suporte futuro a GENERAL_ADMISSION).
-- **O que foi implementado:** Schema do Prisma atualizado (`Reservation` ganhou `seatId`, `Seat` ganhou `reservations`).
+O desenvolvimento deste desafio adotou ferramentas de IA de forma iterativa e assistida para:
+- discussão de arquitetura e validação de abordagens;
+- decomposição do desafio em fases de engenharia menores e testáveis;
+- revisão de código e sugestão de padrões (como o uso do Zod para schemas e do padrão BFF para a TMDb);
+- geração inicial de algumas implementações que posteriormente foram revisadas e ajustadas;
+- preparação de cenários de teste manuais focados na concorrência do banco de dados;
+- auditoria de aderência aos requisitos do desafio.
 
----
+## Decisões técnicas discutidas/revisadas
 
-### Decisão 02: Concorrência e overbooking
+As seguintes implementações contaram com discussões diretas junto à IA para pesar alternativas:
 
-- **Problema:** A checagem clássica de estoque (ler, verificar se é > 0 e depois atualizar) falha em milissegundos se duas requisições ocorrerem juntas, causando overbooking (estoque negativo) ou dupla reserva na mesma cadeira.
-- **Sugestão da IA:** Usar concorrência otimista via Banco de Dados com atualização condicional atômica (`updateMany`), verificando e abatendo o saldo/status em um único comando no Prisma.
-- **Decisão tomada:** Adotar atualização atômica (`updateMany`) sempre checando o estado atual na cláusula `where`.
-- **Por que aceitei:** Diferenciei perfeitamente que "transação" garante que as tabelas mudem juntas, mas apenas a "atomicidade" com trava condicional impede que duas requisições leiam o mesmo dado concorrentemente.
-- **O que foi implementado:** `reserveGeneralTicket` e `reserveSeatedTicket` usam `updateMany` checando `availableStock: { gt: 0 }` e `status: "AVAILABLE"`. Se `count === 0`, estouram erro 409.
+- **Concorrência na reserva de assentos:** Debate sobre como utilizar atualizações condicionais (`updateMany`) e transações no Prisma para impedir reserva concorrente do mesmo recurso.
+- **Estoque GENERAL_ADMISSION:** Lógica de decréscimo atômico de ingressos de pista limitando rigorosamente o quantitativo.
+- **Integração TMDb pelo backend:** Definição da arquitetura BFF (Backend for Frontend) para garantir que a chave da TMDb nunca fosse enviada ao navegador do cliente.
+- **HMAC do ingresso:** Implementação da geração segura do código e assinatura criptográfica enviada no QR Code, usando validação protegida via `timingSafeEqual`.
+- **Compartilhamento com shareToken:** Decisão de não usar IDs internos publicamente, adotando um token aleatório para visualização que mantém intacta a regra de consumo único.
+- **Validação QR e manual:** Separação dos fluxos de entrada na portaria: o scanner lê o payload do QR e o backend valida sua assinatura HMAC, enquanto a validação manual consulta pelo código do ingresso (`ticketCode`).
+- **Migrations e reprodutibilidade:** Detecção de ausência de versionamento no banco local e estruturação final das migrations versionadas para assegurar reprodutibilidade de novos clones do repositório.
 
----
+## O que não foi delegado cegamente
 
-### Decisão 03: Pagamento e autorização
+As ferramentas foram utilizadas para propor implementações e discutir decisões, mas as alterações foram executadas incrementalmente, compiladas, testadas e revisadas. Foram mantidas as seguintes práticas:
+- As propostas de arquitetura e modelagem do banco foram lidas criticamente e validadas contra as restrições de escopo.
+- Builds do backend e frontend, análises estáticas (lint) e execuções manuais de validação (smoke tests) foram disparadas sistematicamente.
+- As abordagens propostas foram revisadas e ajustadas repetidas vezes quando não atendiam plenamente à segurança, à concorrência assíncrona ou aos contratos das APIs desenhadas para a solução.
 
-- **Problema:** Qualquer pessoa autenticada conseguia disparar o pagamento da reserva de outro usuário (IDOR), e o botão de pagamento não protegia contra múltiplos cliques (concorrência que geraria ingressos infinitos).
-- **Sugestão da IA:** Verificar se o `userId` logado bate com o dono da reserva e fazer a transição de status (`PENDING` -> `CONFIRMED`/`REFUSED`) também usando atomicidade condicional.
-- **Decisão tomada:** Seguir com a verificação de propriedade e aplicar transição atômica nos dois cenários (Aprovar e Recusar).
-- **Por que aceitei:** Para garantir que, num clique duplo ou ataque malicioso, apenas uma requisição tenha sucesso na cobrança. Também devolvemos o assento/estoque no caso de pagamento recusado sem brechas.
-- **O que foi implementado:** Método `processPayment` reescrito com proteção anti-IDOR, transição via `updateMany` condicional e devolução do assento/estoque na recusa, tudo dentro do `$transaction`.
+## Exemplos de correções realizadas após revisão
 
----
+Durante o desenvolvimento, algumas implementações iniciais geradas com auxílio da IA precisaram de correções após testes e auditorias:
 
-### Decisão 04: Segurança do ingresso
+- **Identificação do bug de evento SEATED sem assentos:** A implementação inicial para criar eventos numerados retornava HTTP 201, mas omitia a criação das entidades dos assentos no banco. Durante a revisão, o problema foi identificado e ajustado para incluir a geração física atrelada à capacidade (`totalCapacity`).
+- **Correção da geração após fileira Z:** O algoritmo inicial para colunas/fileiras reiniciava os códigos indevidamente em capacidades altas. Após validações e testes manuais com capacidades superiores a 260 assentos, a lógica foi corrigida para suportar a série contínua (AA, AB, AC).
+- **Distinção entre validação QR e manual:** Houve uma proposta inicial de mesclar a validação baseada em hash com a digitação manual do porteiro na mesma rota. Para manter a integridade, decidiu-se separar os dois contratos em rotas isoladas.
+- **Identificação da migration ausente:** Foi identificado que o desenvolvimento local estava progredindo utilizando o comando `db push`, o que resultou na ausência da migration SQL correspondente ao campo `shareToken`. O fluxo foi ajustado para gerar a migration e garantir a instalação por meio do comando `migrate deploy`.
 
-- **Problema:** O código de QR gerava tickets inseguros usando `Math.random()`, com uma assinatura que vulnerabilizava a catraca contra forjamentos e ataques de tempo. Além disso, a portaria aceitava ingressos de outros eventos se fossem reais.
-- **Sugestão da IA:** Trocar por `crypto.randomBytes(8)`, comparar as chaves com `crypto.timingSafeEqual`, consumir o ingresso de forma atômica e enviar o `eventId` da catraca no Payload.
-- **Decisão tomada:** Aceita integralmente as recomendações, blindando adicionalmente a mensagem de erro para evitar enumeração de ingressos por hackers.
-- **Por que aceitei:** Aumenta exponencialmente a segurança para níveis de produção e corrige o problema grave de contexto ("ingressos válidos na catraca errada").
-- **O que foi implementado:** `ticketCode` migrou para bytes criptográficos. Portaria envia `eventId`. `timingSafeEqual` garante comparação segura de HMAC. Retorno genérico (400) para forjamentos, e consumo atômico via `updateMany` (status `VALID` -> `USED`).
+## Limitações
+ 
+O uso de ferramentas de IA exige revisão técnica das respostas geradas:
+- Modelos generativos podem produzir afirmações imprecisas ou sugerir códigos parciais como soluções definitivas, exigindo validação técnica contínua.
+- Implementações de banco de dados podem parecer funcionais em cenários simples, mas frequentemente requerem revisões rigorosas (como o uso de atualizações condicionais) para tratar alta concorrência adequadamente.
+- Relatórios automatizados podem confundir a execução de scripts imperativos isolados (smoke tests) com suítes de testes automatizados reais. Os artefatos foram revisados para descrever com precisão que o projeto utiliza builds, lint e testes manuais de negócio, sem integração formal de suíte no comando `npm test`.
 
----
-
-### Decisão 05: Configuração e validação
-
-- **Problema:** Erros 500 poluindo respostas, variáveis de ambiente lidas perigosamente com `as string`, e inputs processados sem validação de formato rigorosa (strings vazias ou tipos incorretos).
-- **Sugestão da IA:** Padrão "Fail Fast" centralizado para o `.env`, implantação de validação isolada com Zod, e uso de uma classe `AppError`.
-- **Decisão tomada:** Zod aplicado nas rotas, `AppError` mapeado nos blocos `catch` de todos os Controllers, e falha rígida de inicialização para Secrets faltantes.
-- **Por que aceitei:** A distinção entre validação de formato (Zod) e regra de negócio (Service) manteve a arquitetura limpa. Respostas claras em HTTP 400 ajudam no Front-End, e o Fail Fast evita servidores zumbis em produção.
-- **O que foi implementado:** `src/config/env.ts` valida as chaves. ZodSchemas criados para as 4 rotas de mutação usando `safeParse`. Todos os serviços trocados para lançar `AppError` respeitando os códigos HTTP correspondentes (400, 401, 403, 404, 409).
-
----
-
-### Decisão 06: Arquitetura e sessão no Front-End
-
-- **Problema:** Precisávamos escolher uma stack robusta mas simples para o MVP do front-end sem depender de complexidade excessiva.
-- **Decisão tomada:** Utilizar React com Vite, Fetch nativo e Context API. Optou-se por armazenar o JWT no localStorage.
-- **Por que aceitei:** Porque o uso do fetch e Context API limpa as dependências. A escolha do localStorage é uma decisão consciente de MVP com o risco reconhecido de XSS, assumindo o trade-off pela simplicidade temporária da Fase 1.
-- **O que foi implementado:** Estrutura gerada com Vite, AuthContext.tsx e injetor automático de header no pi.ts.
-
----
-
-### Decisão 07: Navegação, autorização e consistência
-
-- **Problema:** Proteger as rotas de forma limpa e impedir erros em caso de URL compartilhada e concorrência na compra.
-- **Decisão tomada:** Adotar ProtectedRoute para roteamento condicional (UX), mas não delegar a segurança final para o cliente.
-- **Por que aceitei:** A clareza de separar o estado do Domínio (no Prisma via erro 409) do estado da Interface (UI transitória). O Front-End apenas exibe e guia o usuário, enquanto a validação e autorização ocorrem no Backend, garantindo que mesmo se houver F5 (URLs recuperáveis), a segurança e o estado real permaneçam íntegros.
-- **O que foi implementado:** Proteção de papéis em React Router, tratamento catch-all para HTTP 409 em ReservationPage.tsx e recuperação semântica após falha (liberando a UI do ingresso perdido).
-
+Todas as saídas foram progressivamente revisadas, documentadas e ajustadas contra o repositório em disco e o descritivo de avaliação.
