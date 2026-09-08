@@ -1,24 +1,27 @@
 @use '../styles/variables' as *;
 
 .home-page.container {
-  // Sobrescreve o container global (1120px) para aproveitar melhor as telas desktop 
-  // e aproximar-se do padrǜo de streaming/cinema.
+  // Container amplo para streaming, mas limitado a 1400px para nǜo esticar demais
   max-width: 1400px;
   padding-inline: ($space-base * 4);
 }
 
 .home-page {
   &__header {
-    margin-bottom: ($space-base * 6);
-    text-align: center;
+    // Reduzido o espaamento inferior para aproximar do grid (compacto)
+    margin-bottom: ($space-base * 4);
+    // Removido o text-align: center para alinhar tudo ǭ esquerda
+    text-align: left;
 
     h1 {
-      font-size: 2.5rem;
-      margin-bottom: ($space-base);
+      font-size: 2.25rem;
+      font-weight: 800;
+      margin-bottom: ($space-base * 0.5);
+      color: $color-text-main;
     }
 
     p {
-      color: $color-text-secondary;
+      color: rgba(255, 255, 255, 0.6);
       font-size: 1.1rem;
     }
   }
@@ -26,17 +29,18 @@
 
 .events-grid {
   display: grid;
-  // Limita o tamanho do card entre 280px e 320px no mǭximo.
-  // Impede que poucos itens (ex: 2 eventos) cresam desproporcionalmente para ocupar a tela toda.
+  // MantǸm o limite seguro de largura dos cards
   grid-template-columns: repeat(auto-fill, minmax(280px, 320px));
-  justify-content: center; // Centraliza o bloco de cards no container
-  gap: ($space-base * 4);
+  // Alinha a fileira de cards estritamente ǭ esquerda
+  justify-content: start;
+  // Gap reduzido de 32px para 24px para manter os eventos mais unidos, como um carrossel visual
+  gap: ($space-base * 3);
 }
 
 .state-message {
-  text-align: center;
-  padding: ($space-base * 6) 0;
-  color: $color-text-secondary;
+  text-align: left;
+  padding: ($space-base * 4) 0;
+  color: rgba(255, 255, 255, 0.6);
 
   &--error {
     color: #ff4d4d;
