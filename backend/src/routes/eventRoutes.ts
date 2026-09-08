@@ -30,4 +30,11 @@ eventRoutes.patch(
   eventController.update,
 );
 
+eventRoutes.delete(
+  "/:id",
+  ensureAuthenticated,
+  ensureRole(["ORGANIZER"]),
+  eventController.delete,
+);
+
 export { eventRoutes };

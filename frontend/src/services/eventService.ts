@@ -37,5 +37,12 @@ export const eventService = {
       method: 'PATCH',
       body: JSON.stringify(data)
     });
+  },
+
+  // Exclui um evento
+  async deleteEvent(id: string): Promise<void> {
+    return fetchApi<void>(`/events/${id}`, {
+      method: 'DELETE',
+    });
   }
 };

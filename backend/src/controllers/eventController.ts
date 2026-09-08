@@ -108,4 +108,30 @@ export class EventController {
       return res.status(500).json({ error: "Erro ao criar evento." });
     }
   }
+
+  async delete(req: Request, res: Response) {
+    try {
+      const validation = getEventByIdParamsSchema.safeParse(req.params);
+
+      if (!validation.success) {
+        return res.status(400).json({
+          error: "ID inválido.",
+          details: validation.error.flatten().fieldErrors
+        });
+      }
+
+      const eventId = validation.data.id;
+      const organizerId = (req as any).user.id;
+
+      await eventService.delete(eventId, organizerId);
+
+      return res.status(204).send();
+    } catch (error: any) {
+      if (error instanceof AppError) {
+        return res.status(error.statusCode).json({ error: error.message });
+      }
+      console.error(error);
+      return res.status(500).json({ error: "Erro ao excluir evento." });
+    }
+  }
 }

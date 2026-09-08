@@ -147,4 +147,37 @@ export class EventService {
 
     return updatedEvent;
   }
+
+  async delete(id: string, organizerId: string) {
+    const event = await prisma.event.findUnique({
+      where: { id }
+    });
+
+    if (!event) {
+      throw new AppError("Evento não encontrado.", 404);
+    }
+
+    if (event.organizerId !== organizerId) {
+      throw new AppError("Você não tem permissão para excluir este evento.", 403);
+    }
+
+    // Consulta de histórico REAL: ignoramos o availableStock e verificamos as
+    // relações diretamente. Existindo histórico, bloqueamos para manter integridade.
+    const hasReservation = await prisma.reservation.findFirst({
+      where: { eventId: id }
+    });
+
+    const hasTicket = await prisma.ticket.findFirst({
+      where: { eventId: id }
+    });
+
+    if (hasReservation || hasTicket) {
+      throw new AppError("Não é possível excluir um evento que possui reservas ou ingressos associados.", 409);
+    }
+
+    // Exclusão segura. Seats serão excluídos automaticamente via onDelete: Cascade.
+    await prisma.event.delete({
+      where: { id }
+    });
+  }
 }
