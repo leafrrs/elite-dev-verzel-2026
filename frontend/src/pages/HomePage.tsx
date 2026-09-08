@@ -9,6 +9,10 @@ export function HomePage() {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error' | 'empty'>('idle');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  // Novos estados para a Busca e Filtros
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterType, setFilterType] = useState<'ALL' | 'SEATED' | 'GENERAL_ADMISSION'>('ALL');
+
   useEffect(() => {
     async function loadEvents() {
       setStatus('loading');
@@ -27,7 +31,14 @@ export function HomePage() {
     }
 
     loadEvents();
-  }, []); // Array vazio = Roda apenas 1 vez ao montar a página
+  }, []);
+
+  // Lista Derivada: Filtra em tempo de renderização
+  const filteredEvents = events.filter((event) => {
+    const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesType = filterType === 'ALL' || event.type === filterType;
+    return matchesSearch && matchesType;
+  });
 
   return (
     <div className="container home-page">
@@ -55,11 +66,53 @@ export function HomePage() {
       )}
 
       {status === 'success' && (
-        <section className="events-grid">
-          {events.map((event) => (
-            <EventCard key={event.id} event={event} />
-          ))}
-        </section>
+        <>
+          <div className="catalog-controls">
+            <div className="search-wrapper">
+              <span className="search-icon" aria-hidden="true">🔍</span>
+              <input
+                type="text"
+                placeholder="Buscar eventos..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="search-input"
+              />
+            </div>
+            
+            <div className="filter-pills">
+              <button
+                className={`filter-pill ${filterType === 'ALL' ? 'active' : ''}`}
+                onClick={() => setFilterType('ALL')}
+              >
+                Todos
+              </button>
+              <button
+                className={`filter-pill ${filterType === 'SEATED' ? 'active' : ''}`}
+                onClick={() => setFilterType('SEATED')}
+              >
+                Cadeiras
+              </button>
+              <button
+                className={`filter-pill ${filterType === 'GENERAL_ADMISSION' ? 'active' : ''}`}
+                onClick={() => setFilterType('GENERAL_ADMISSION')}
+              >
+                Pista
+              </button>
+            </div>
+          </div>
+
+          {filteredEvents.length === 0 ? (
+            <div className="state-message">
+              <p>Nenhum evento encontrado para a sua busca.</p>
+            </div>
+          ) : (
+            <section className="events-grid">
+              {filteredEvents.map((event) => (
+                <EventCard key={event.id} event={event} />
+              ))}
+            </section>
+          )}
+        </>
       )}
     </div>
   );
