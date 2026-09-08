@@ -10,7 +10,7 @@
   transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), 
               border-color 0.3s ease, 
               box-shadow 0.3s ease;
-  cursor: pointer;
+  // cursor: pointer removido para que o usuário não ache que a imagem/card é clicável
 
   &:hover {
     transform: scale(1.02);
