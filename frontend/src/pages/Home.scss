@@ -1,28 +1,36 @@
 @use '../styles/variables' as *;
 
+.home-page.container {
+  // Sobrescreve o container global (1120px) para aproveitar melhor as telas desktop 
+  // e aproximar-se do padrǜo de streaming/cinema.
+  max-width: 1400px;
+  padding-inline: ($space-base * 4);
+}
+
 .home-page {
   &__header {
-    margin-bottom: ($space-base * 5);
+    margin-bottom: ($space-base * 6);
     text-align: center;
 
     h1 {
-      font-size: 2rem;
+      font-size: 2.5rem;
       margin-bottom: ($space-base);
     }
 
     p {
       color: $color-text-secondary;
+      font-size: 1.1rem;
     }
   }
 }
 
-// O Grid Responsivo Mágico
-// auto-fill: Tenta colocar o máximo de colunas possíveis
-// minmax(280px, 1fr): A coluna nunca fica menor que 280px. Se sobrar espaço, ela cresce até 1fr.
 .events-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: ($space-base * 3);
+  // Limita o tamanho do card entre 280px e 320px no mǭximo.
+  // Impede que poucos itens (ex: 2 eventos) cresam desproporcionalmente para ocupar a tela toda.
+  grid-template-columns: repeat(auto-fill, minmax(280px, 320px));
+  justify-content: center; // Centraliza o bloco de cards no container
+  gap: ($space-base * 4);
 }
 
 .state-message {
