@@ -1,107 +1,165 @@
 @use '../styles/variables' as *;
 
+.event-details.container {
+  max-width: 1400px;
+  padding-inline: ($space-base * 4);
+  padding-top: ($space-base * 6);
+  padding-bottom: ($space-base * 8);
+}
+
 .event-details {
+  // Transforma o layout principal num grid de Poster (Esq) + Conteúdo (Dir)
+  display: grid;
+  grid-template-columns: minmax(280px, 340px) 1fr;
+  gap: ($space-base * 8);
+  align-items: start; // Evita que o poster estique acompanhando a altura da coluna direita
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: ($space-base * 4);
+  }
+
   &__banner {
     width: 100%;
-    height: 350px;
-    border-radius: $radius-md;
+    // Abandona o 21/9 e assume proporção clássica de poster de cinema
+    aspect-ratio: 2 / 3; 
+    border-radius: 16px;
     overflow: hidden;
-    margin-bottom: ($space-base * 4);
     background-color: #000;
+    position: relative;
+    // Sem margin-bottom, o grid 'gap' faz o trabalho agora
 
     img {
+      display: block;
       width: 100%;
       height: 100%;
       object-fit: cover;
-      opacity: 0.9;
+      // Retornamos ao center, pois a proporção 2:3 naturalmente já pega 
+      // a altura inteira do poster original
+      object-position: center; 
+      opacity: 0.95;
     }
   }
 
   &__main {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: ($space-base * 6);
+    // Antes era grid, agora empilha as informações verticalmente (Título -> Descrição -> Preço)
+    display: flex;
+    flex-direction: column;
+    gap: ($space-base * 3);
   }
 
   &__info {
     h1 {
-      font-size: 2.5rem;
-      margin-bottom: ($space-base * 2);
+      font-size: 2.75rem;
+      font-weight: 800;
+      line-height: 1.2;
+      color: $color-text-main;
+      margin-bottom: ($space-base * 1.5);
+      max-width: 900px;
     }
   }
 
   &__description {
-    color: $color-text-secondary;
+    color: rgba(255, 255, 255, 0.7);
     line-height: 1.6;
-    font-size: 1.05rem;
-    margin-bottom: ($space-base * 4);
-    white-space: pre-wrap; // Respeita quebras de linha enviadas do backend
+    font-size: 1.1rem;
+    margin-bottom: ($space-base * 3);
+    max-width: 800px;
+    white-space: pre-wrap;
   }
 
   &__metadata {
-    background-color: $color-bg-surface;
-    padding: ($space-base * 3);
-    border-radius: $radius-md;
-    border: 1px solid rgba($color-text-secondary, 0.1);
-    display: flex;
-    flex-direction: column;
-    gap: ($space-base * 1.5);
-
-    strong {
-      color: $color-text-main;
-      margin-right: ($space-base);
+    background-color: transparent;
+    border: none;
+    padding: 0;
+    
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: ($space-base * 4);
+    margin-bottom: 0; // Removido para aproximar o checkout
+    
+    @media (max-width: 576px) {
+      grid-template-columns: 1fr;
+      gap: ($space-base * 3);
     }
 
     p {
-      color: $color-text-secondary;
+      color: $color-text-main;
+      font-size: 1.05rem;
+      font-weight: 500;
+      margin: 0;
+      line-height: 1.4;
+
+      strong {
+        display: block; 
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: rgba(255, 255, 255, 0.45);
+        margin-right: 0;
+        margin-bottom: 4px;
+      }
     }
   }
 }
 
 .checkout-card {
-  background-color: $color-bg-surface;
-  padding: ($space-base * 3);
-  border-radius: $radius-md;
-  border: 1px solid rgba($color-text-secondary, 0.1);
+  background-color: rgba(255, 255, 255, 0.03); 
+  padding: ($space-base * 4); 
+  border-radius: 16px; 
+  border: 1px solid rgba(255, 255, 255, 0.05); 
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25); 
   display: flex;
   flex-direction: column;
-  gap: ($space-base * 3);
-  position: sticky;
-  top: 100px; // Acompanha o scroll
+  gap: ($space-base * 4);
+  
+  // Sticky removido, pois agora ele flui integradamente após a metadata
+  max-width: 420px; // Limita a largura para não virar um botão esticado bizarro no desktop
+  margin-top: 0; // Removido para integrar com os metadados
 
   &__price {
-    font-size: 2.5rem;
-    font-weight: 700;
+    font-size: 2.25rem;
+    font-weight: 800;
     color: $color-accent;
     text-align: center;
+    line-height: 1;
   }
 
   .btn-primary {
     width: 100%;
     background-color: $color-accent;
     color: white;
-    padding: ($space-base * 2);
-    border-radius: $radius-sm;
-    font-weight: 600;
+    padding: ($space-base * 2) 0;
+    border-radius: 8px;
+    font-weight: 700;
     font-size: 1.1rem;
-    transition: opacity 0.2s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 
     &:hover:not(:disabled) {
-      opacity: 0.9;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    }
+
+    &:focus-visible {
+      outline: 2px solid $color-accent;
+      outline-offset: 4px;
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(0);
     }
 
     &:disabled {
-      background-color: rgba($color-text-secondary, 0.2);
-      color: $color-text-secondary;
+      background-color: rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.3);
       cursor: not-allowed;
       border: none;
+      box-shadow: none;
     }
   }
-}
 
-// Mobile Breakpoint simples para o layout de duas colunas
-@media (max-width: 768px) {
-  .event-details__main {
-    grid-template-columns: 1fr;
+  @media (max-width: 768px) {
+    max-width: 100%; // No mobile o card e botão ocupam 100% de conforto para o dedo
   }
 }
