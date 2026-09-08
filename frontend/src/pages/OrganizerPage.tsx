@@ -43,6 +43,12 @@ export function OrganizerPage() {
   const [editFormError, setEditFormError] = useState('');
   const [editFormData, setEditFormData] = useState<UpdateEventPayload>({});
 
+  // Estados de exclusão de evento
+  const [confirmingDeleteId, setConfirmingDeleteId] = useState<string | null>(null);
+  const [deletingEventId, setDeletingEventId] = useState<string | null>(null);
+  const [deleteErrorEventId, setDeleteErrorEventId] = useState<string | null>(null);
+  const [deleteErrorMessage, setDeleteErrorMessage] = useState('');
+
   async function fetchMyEvents() {
     setIsLoadingMyEvents(true);
     setMyEventsError('');
@@ -58,6 +64,8 @@ export function OrganizerPage() {
   }
 
   function startEditing(event: EventModel) {
+    setConfirmingDeleteId(null);
+    setDeleteErrorEventId(null);
     setEditingEventId(event.id);
     setEditFormError('');
     setEditFormData({
@@ -67,6 +75,26 @@ export function OrganizerPage() {
       location: event.location,
       price: event.price
     });
+  }
+
+  async function handleDeleteConfirm(eventId: string) {
+    if (deletingEventId) return;
+
+    setDeletingEventId(eventId);
+    setDeleteErrorEventId(null);
+    setDeleteErrorMessage('');
+
+    try {
+      await eventService.deleteEvent(eventId);
+      setMyEvents(prev => prev.filter(e => e.id !== eventId));
+      setConfirmingDeleteId(null);
+    } catch (err: any) {
+      console.error(err);
+      setDeleteErrorEventId(eventId);
+      setDeleteErrorMessage(err.data?.error || 'Erro inesperado ao excluir o evento.');
+    } finally {
+      setDeletingEventId(null);
+    }
   }
 
   async function handleEditSubmit(e: FormEvent, eventId: string) {
@@ -206,13 +234,17 @@ export function OrganizerPage() {
       </header>
 
       <form onSubmit={handleSearch} className="organizer-page__search">
-        <input 
-          type="text" 
-          placeholder="Ex: Matrix, Avatar, O Poderoso Chefão..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          disabled={isLoading || isSubmitting}
-        />
+        <div className="search-input-wrapper">
+          <span className="search-icon" aria-hidden="true">🔍</span>
+          <input 
+            type="text" 
+            placeholder="Buscar filmes na TMDb..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            disabled={isLoading || isSubmitting}
+            className="search-input"
+          />
+        </div>
         <button type="submit" className="btn-primary" disabled={isLoading || isSubmitting || !query.trim()}>
           {isLoading ? 'Buscando...' : 'Pesquisar'}
         </button>
@@ -478,8 +510,8 @@ export function OrganizerPage() {
                       {editFormError && <p className="error-message">{editFormError}</p>}
                       
                       <div className="actions">
-                        <button type="submit" disabled={isSavingEdit}>
-                          {isSavingEdit ? 'Salvando...' : 'Salvar'}
+                        <button type="submit" className="btn-primary" disabled={isSavingEdit}>
+                          {isSavingEdit ? 'Salvando...' : 'Salvar alterações'}
                         </button>
                         <button type="button" className="btn-secondary" onClick={() => setEditingEventId(null)} disabled={isSavingEdit}>
                           Cancelar
@@ -489,29 +521,58 @@ export function OrganizerPage() {
                   ) : (
                     <>
                       <h3>{event.title}</h3>
-                      <div className="meta">
-                        Data: {new Date(event.date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })} <br/>
-                        Local: {event.location} <br/>
-                        Tipo: {event.type === 'SEATED' ? 'Lugar Marcado' : 'Entrada Geral'} <br/>
-                        Capacidade: {event.totalCapacity} (Disponível: {event.availableStock}) <br/>
-                        Preço: R$ {event.price.toFixed(2)}
-                      </div>
-                      <div className="actions">
-                        <button 
-                          type="button" 
-                          className="btn-secondary"
-                          onClick={() => window.open(`/events/${event.id}`, '_blank')}
-                          title="Ver página pública do evento"
-                        >
-                          Ver Página Pública
-                        </button>
-                        <button 
-                          type="button" 
-                          onClick={() => startEditing(event)}
-                        >
-                          Editar Dados
-                        </button>
-                      </div>
+                        <div className="meta">
+                          Data: {new Date(event.date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })} <br/>
+                          Local: {event.location} <br/>
+                          Tipo: {event.type === 'SEATED' ? 'Lugar Marcado' : 'Entrada Geral'} <br/>
+                          Capacidade: {event.totalCapacity} (Disponível: {event.availableStock}) <br/>
+                          Preço: R$ {event.price.toFixed(2)}
+                        </div>
+                        {deleteErrorEventId === event.id && (
+                          <div className="organizer-page__status organizer-page__status--error" style={{ marginBottom: '16px', padding: '12px' }}>
+                            {deleteErrorMessage}
+                          </div>
+                        )}
+                        {confirmingDeleteId === event.id ? (
+                          <div className="delete-confirmation">
+                            <p>Tem certeza que deseja excluir este evento? Esta ação não poderá ser desfeita.</p>
+                            <div className="actions">
+                              <button type="button" className="btn-secondary" onClick={() => setConfirmingDeleteId(null)} disabled={deletingEventId === event.id}>
+                                Cancelar
+                              </button>
+                              <button type="button" className="btn-danger" onClick={() => handleDeleteConfirm(event.id)} disabled={deletingEventId === event.id}>
+                                {deletingEventId === event.id ? 'Excluindo...' : 'Confirmar exclusão'}
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="actions">
+                            <button 
+                              type="button" 
+                              className="btn-secondary"
+                              onClick={() => window.open(`/events/${event.id}`, '_blank')}
+                              title="Ver página pública do evento"
+                            >
+                              Ver Página Pública
+                            </button>
+                            <button 
+                              type="button" 
+                              onClick={() => startEditing(event)}
+                            >
+                              Editar Dados
+                            </button>
+                            <button
+                              type="button"
+                              className="btn-danger-outline"
+                              onClick={() => {
+                                setConfirmingDeleteId(event.id);
+                                setDeleteErrorEventId(null);
+                              }}
+                            >
+                              Excluir evento
+                            </button>
+                          </div>
+                        )}
                     </>
                   )}
                 </div>

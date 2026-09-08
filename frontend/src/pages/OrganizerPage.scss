@@ -15,15 +15,70 @@
 
   &__search {
     display: flex;
+    flex-direction: column;
     gap: $space-base;
     margin-bottom: ($space-base * 3);
 
-    input {
+    @media (min-width: 768px) {
+      flex-direction: row;
+    }
+
+    .search-input-wrapper {
       flex: 1;
+      display: flex;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 0 ($space-base * 1.5);
+      transition: border-color 0.2s, box-shadow 0.2s;
+
+      &:focus-within {
+        border-color: $color-accent;
+        box-shadow: 0 0 0 1px $color-accent;
+      }
+
+      .search-icon {
+        font-size: 1.1rem;
+        color: rgba(255, 255, 255, 0.4);
+        margin-right: ($space-base * 1.5);
+      }
+
+      .search-input {
+        flex: 1;
+        background: transparent;
+        border: none;
+        color: #fff;
+        padding: ($space-base * 1.5) 0;
+        font-size: 1rem;
+        
+        &::placeholder {
+          color: rgba(255, 255, 255, 0.4);
+        }
+
+        &:focus {
+          outline: none;
+        }
+
+        &:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+      }
     }
     
-    button {
-      min-width: 120px;
+    .btn-primary {
+      min-width: 140px;
+      border-radius: 8px;
+      font-weight: 600;
+      padding: 0 ($space-base * 3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      @media (max-width: 767px) {
+        padding: ($space-base * 1.5);
+      }
     }
   }
 
@@ -301,29 +356,125 @@
       }
       
       .organizer-page__edit-form {
-        display: flex;
-        flex-direction: column;
-        gap: $space-base;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: ($space-base * 2);
         width: 100%;
+        
+        @media (min-width: 768px) {
+          grid-template-columns: 1fr 1fr;
+        }
 
         .form-group {
-          margin-bottom: $space-base;
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+          margin-bottom: 0;
+
           label {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: rgba(255,255,255,0.6);
+            font-weight: 600;
           }
+          
           input {
-            padding: ($space-base * 0.8);
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #fff;
+            padding: 12px;
+            font-size: 1rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            
+            &:focus {
+              outline: none;
+              border-color: $color-accent;
+              box-shadow: 0 0 0 1px $color-accent;
+            }
           }
         }
 
         .error-message {
+          grid-column: 1 / -1;
           color: $color-accent;
           font-size: 0.9rem;
-          margin-bottom: $space-base;
         }
 
         .actions {
+          grid-column: 1 / -1;
+          display: flex;
+          gap: $space-base;
           margin-top: $space-base;
+
+          button {
+            flex: 1;
+            @media (min-width: 768px) {
+              flex: none;
+              min-width: 160px;
+            }
+          }
+
+          .btn-secondary {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #fff;
+            
+            &:hover:not(:disabled) {
+              background: rgba(255,255,255,0.05);
+              border-color: rgba(255,255,255,0.3);
+            }
+          }
+        }
+      }
+
+      .btn-danger-outline {
+        background: transparent;
+        color: #e74c3c;
+        border: 1px solid rgba(231, 76, 60, 0.4);
+        border-radius: $radius-sm;
+        transition: all 0.2s;
+        
+        &:hover:not(:disabled) {
+          background: rgba(231, 76, 60, 0.1);
+          border-color: #e74c3c;
+        }
+      }
+
+      .btn-danger {
+        background: #e74c3c;
+        color: #fff;
+        border: none;
+        border-radius: $radius-sm;
+        transition: all 0.2s;
+        
+        &:hover:not(:disabled) {
+          background: darken(#e74c3c, 10%);
+        }
+      }
+
+      .delete-confirmation {
+        background: rgba(231, 76, 60, 0.05);
+        border: 1px solid rgba(231, 76, 60, 0.2);
+        border-radius: $radius-md;
+        padding: ($space-base * 2);
+        margin-top: auto;
+        
+        p {
+          color: $color-text-main;
+          margin-bottom: ($space-base * 2);
+          font-size: 0.95rem;
+          line-height: 1.4;
+        }
+
+        .actions {
+          display: flex;
+          gap: $space-base;
+          button {
+            flex: 1;
+            padding: ($space-base * 0.8) ($space-base * 1.5);
+          }
         }
       }
     }
